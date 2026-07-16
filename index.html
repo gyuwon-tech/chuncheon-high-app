@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#05070a" />
-<title>GW HSI v2.3 — 춘천고 3학년 대시보드</title>
+<title>GW HSI v2.4 — 춘천고 3학년 대시보드</title>
 <meta name="description" content="Gyuwon High School Information · 춘천고 고3 전용 수능 HUD, 학사일정, 점수 기록, 학습 큐레이션." />
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -319,15 +319,13 @@ header {
   background: var(--bg-3);
   overflow: hidden;
 }
-.card__thumb img,
-.card__thumb .placeholder-thumb {
+.card__thumb img {
   width: 100%; height: 100%;
   object-fit: cover;
   display: block;
   transition: transform 0.45s ease;
 }
-.card:hover .card__thumb img,
-.card:hover .card__thumb .placeholder-thumb {
+.card:hover .card__thumb img {
   transform: scale(1.04);
 }
 .card__badge {
@@ -364,6 +362,34 @@ header {
   max-width: 80%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .card__arrow { color: var(--neon-green); font-family: var(--font-mono); font-weight: 700; }
+
+/* skeleton loading placeholder styling */
+.skeleton-block {
+  background: var(--bg-3);
+  border-radius: 4px;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+.card--skeleton .card__thumb .skeleton-block {
+  width: 100%;
+  height: 100%;
+}
+.card--skeleton .skel-title {
+  height: 14px;
+  margin-bottom: 8px;
+}
+.card--skeleton .skel-title.short {
+  width: 60%;
+}
+.card--skeleton .skel-meta {
+  height: 11px;
+  width: 40%;
+  margin-top: 14px;
+}
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 0.3; }
+  100% { opacity: 0.6; }
+}
 
 /* =========================================================
    TABLES & COMMON TAB CONTENTS (TOUCH SCROLL OPTIMIZED)
@@ -566,7 +592,7 @@ footer {
 
   <header>
     <div class="main-title">FOCUS.exe // CORE SYSTEM</div>
-    <div class="logo-gwhsi">GW HSI v2.3</div>
+    <div class="logo-gwhsi">GW HSI v2.4</div>
   </header>
 
   <div class="timer-grid">
@@ -811,17 +837,18 @@ const CATEGORIES = {
     ]
   },
   mental: {
-    label: "멘탈관리 · SQ3R 고3 최적화 공부법",
-    badge: "PSY",
-    query: "SQ3R 공부법 고3 멘탈관리 수능",
+    label: "멘탈관리 · 수능 실전 꿀팁 및 마인드셋 스트림",
+    badge: "MIND",
+    query: "수능시험장 꿀팁 동기부여 슬럼프 극복 공부 자극",
     mock: [
-      // [v2.3 FIX] 제작자 고정 영상 마운트 (이동 링크 수동 활성화 지원)
+      // 📌 [고정 추천 1개] 고이여름 꿀팁 영상
       { 
         title: "🔥 [제작자 추천] 전직 수능 감독관이 알려주는 수능시험장 꿀팁 (학교에서 안 알려주는 것 위주)", 
         channel: "고이여름", 
         videoId: "HDFtf-cfzSw",
         mockSeed: 99
       },
+      // 📌 나머지 5개는 API 로드 시 셔플되며, Mock 모드에서는 mockSeed 기반으로 예비 로드됩니다.
       { title: "SQ3R 학습법 — 교과서 1번에 끝내는 5단계", channel: "공부심리연구소", mockSeed: 31 },
       { title: "고3 슬럼프, 뇌과학으로 5분 안에 빠져나오기", channel: "BRAIN STUDY", mockSeed: 32 },
       { title: "수능 D-100, 멘탈 무너질 때 보는 영상", channel: "고3멘토", mockSeed: 33 },
@@ -935,7 +962,7 @@ function hideStatus() {
 
 function shuffleArray(array) {
   const arr = [...array];
-  // [v2.3 FIX] 맨 처음 고정 추천 영상은 셔플에서 제외
+  // [v2.4 FIX] 맨 처음 고정 추천 영상(고이여름)이 있다면 첫 자리에 그대로 유지하고 나머지만 셔플
   const hasFixed = arr[0] && arr[0].videoId === "HDFtf-cfzSw";
   const startIdx = hasFixed ? 1 : 0;
   
@@ -947,7 +974,7 @@ function shuffleArray(array) {
 }
 
 function makeMockThumb(category, seed) {
-  // 고정 수능 팁 영상의 경우 유튜브 실제 썸네일 목업 생성
+  // [v2.4 FIX] 고정 수능 팁 영상 Mock 전용 플레이트 개선
   if (seed === 99) {
     const svgSpec = `
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 270" preserveAspectRatio="xMidYMid slice">
@@ -958,13 +985,13 @@ function makeMockThumb(category, seed) {
           </linearGradient>
         </defs>
         <rect width="480" height="270" fill="url(#gSpecial)"/>
-        <circle cx="240" cy="135" r="50" fill="#00ff41" fill-opacity="0.2"/>
-        <polygon points="225,110 265,135 225,160" fill="#00ff41"/>
+        <circle cx="240" cy="135" r="50" fill="#ffd166" fill-opacity="0.2"/>
+        <polygon points="225,110 265,135 225,160" fill="#ffd166"/>
         <text x="240" y="210" font-family="Noto Sans KR, sans-serif" font-size="16" font-weight="800" fill="#e7eaf2" text-anchor="middle">
           수능 시험장 실전 꿀팁.avi
         </text>
-        <text x="240" y="235" font-family="JetBrains Mono, monospace" font-size="11" fill="#00ff41" text-anchor="middle" letter-spacing="1">
-          // CREATOR RECOMMENDED
+        <text x="240" y="235" font-family="JetBrains Mono, monospace" font-size="11" fill="#ffd166" text-anchor="middle" letter-spacing="1">
+          // RECOMMENDATION MATRIX
         </text>
       </svg>
     `.trim();
@@ -1005,14 +1032,19 @@ function renderCards(items, category) {
   const badge = CATEGORIES[category]?.badge || "QUEUE";
 
   items.forEach((item, idx) => {
-    // 덤프 모드더라도 특정 지정 영상(고이여름)은 실제 이동 링크를 타도록 이탈 예외 처리
     const hasForceLink = item.videoId === "HDFtf-cfzSw";
     const isReal = !!item.videoId;
     const href = (isReal || hasForceLink) ? `https://www.youtube.com/watch?v=${item.videoId}` : "#";
     
-    const thumbEl = isReal && item.thumbnail
-      ? `<img src="${item.thumbnail}" alt="" loading="lazy">`
-      : `<img class="placeholder-thumb" src="${makeMockThumb(category, item.mockSeed || idx + 1)}" alt="">`;
+    // [v2.4 FIX] Mock 모드 또는 에러 모드여도 고이여름 영상은 고해상도 실제 썸네일(hqdefault)을 마운트하여 썸네일 먹통 현상 디버깅 완료
+    let thumbEl = "";
+    if (hasForceLink) {
+      thumbEl = `<img src="https://i.ytimg.com/vi/${item.videoId}/hqdefault.jpg" alt="${item.title}" loading="lazy">`;
+    } else if (isReal && item.thumbnail) {
+      thumbEl = `<img src="${item.thumbnail}" alt="" loading="lazy">`;
+    } else {
+      thumbEl = `<img src="${makeMockThumb(category, item.mockSeed || idx + 1)}" alt="">`;
+    }
 
     const a = document.createElement("a");
     a.className = "card";
@@ -1027,7 +1059,6 @@ function renderCards(items, category) {
       });
     }
 
-    // 추천 카드 스타일 테두리 강조
     if (hasForceLink) {
       a.style.borderColor = "var(--warn)";
       a.style.boxShadow = "0 0 12px rgba(255, 209, 102, 0.15)";
@@ -1097,7 +1128,7 @@ async function fetchYouTube(category) {
     thumbnail: it.snippet.thumbnails?.medium?.url
   }));
 
-  // [v2.3] API 통신 모드일 경우에도 제작자 추천 영상을 맨 앞으로 강제 배치
+  // [v2.4 FIX] API 모드에서도 고이여름 영상을 맨 앞으로 고정하고 나머지만 슬롯에 셔플
   if (category === "mental") {
     const recVideo = CATEGORIES.mental.mock[0];
     const filtered = formatted.filter(it => it.videoId !== recVideo.videoId);
@@ -1122,6 +1153,8 @@ async function loadCategory(category) {
     } else {
       showStatus(`DUMP MODE OVERRIDE — 유튜브 통신 장애 (${err.message}) 에 대응하여 안전한 mock 버퍼를 출력합니다.`);
     }
+    
+    // [v2.4 FIX] Mock 오프라인 상태에서도 수능 꿀팁 고정이 항상 첫 자리에 오도록 셔플 제어 적용
     const shuffledMock = shuffleArray(cfg.mock);
     renderCards(shuffledMock, category);
   }
@@ -1299,4 +1332,3 @@ loadCategory("lofi");
 </script>
 </body>
 </html>
-
