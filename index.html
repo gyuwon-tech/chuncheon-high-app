@@ -772,8 +772,7 @@ footer {
 /* =========================================================
    CORE CONFIG & DATA STRUCTURES
    ========================================================= */
-// 💡 [참고] API 할당량이 다 닳았다면 아래 키 값을 새로 발급받은 키로 교체해 주세요!
-const YT_API_KEY = "AIzaSyDkHWYIVMyB3kVj0Cyp5kGcV4XxExpx2Q0"; 
+const YT_API_KEY = "AIzaSyATH3qxHR3SjUZZTsvYy6qIBNvDqdT-JVg"; 
 const YT_ENDPOINT = "https://www.googleapis.com/youtube/v3/search";
 
 // 춘천고등학교 고3 학사일정 마스터 데이터 (99회 졸업식 적용)
@@ -842,12 +841,14 @@ const CATEGORIES = {
     badge: "MIND",
     query: "수능시험장 꿀팁 동기부여 슬럼프 극복 공부 자극",
     mock: [
+      // 📌 [고정 추천 1개] 고이여름 꿀팁 영상
       { 
         title: "🔥 [제작자 추천] 전직 수능 감독관이 알려주는 수능시험장 꿀팁 (학교에서 안 알려주는 것 위주)", 
         channel: "고이여름", 
         videoId: "HDFtf-cfzSw",
         mockSeed: 99
       },
+      // 📌 나머지 5개는 API 로드 시 셔플되며, Mock 모드에서는 mockSeed 기반으로 예비 로드됩니다.
       { title: "SQ3R 학습법 — 교과서 1번에 끝내는 5단계", channel: "공부심리연구소", mockSeed: 31 },
       { title: "고3 슬럼프, 뇌과학으로 5분 안에 빠져나오기", channel: "BRAIN STUDY", mockSeed: 32 },
       { title: "수능 D-100, 멘탈 무너질 때 보는 영상", channel: "고3멘토", mockSeed: 33 },
@@ -961,6 +962,7 @@ function hideStatus() {
 
 function shuffleArray(array) {
   const arr = [...array];
+  // [v2.4 FIX] 맨 처음 고정 추천 영상(고이여름)이 있다면 첫 자리에 그대로 유지하고 나머지만 셔플
   const hasFixed = arr[0] && arr[0].videoId === "HDFtf-cfzSw";
   const startIdx = hasFixed ? 1 : 0;
   
@@ -972,6 +974,7 @@ function shuffleArray(array) {
 }
 
 function makeMockThumb(category, seed) {
+  // [v2.4 FIX] 고정 수능 팁 영상 Mock 전용 플레이트 개선
   if (seed === 99) {
     const svgSpec = `
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 270" preserveAspectRatio="xMidYMid slice">
@@ -1033,6 +1036,7 @@ function renderCards(items, category) {
     const isReal = !!item.videoId;
     const href = (isReal || hasForceLink) ? `https://www.youtube.com/watch?v=${item.videoId}` : "#";
     
+    // [v2.4 FIX] Mock 모드 또는 에러 모드여도 고이여름 영상은 고해상도 실제 썸네일(hqdefault)을 마운트하여 썸네일 먹통 현상 디버깅 완료
     let thumbEl = "";
     if (hasForceLink) {
       thumbEl = `<img src="https://i.ytimg.com/vi/${item.videoId}/hqdefault.jpg" alt="${item.title}" loading="lazy">`;
@@ -1100,33 +1104,9 @@ function escapeHtml(str) {
   return String(str).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
 }
 
-/* =========================================================
-   [v2.4 NEW] CACHE SYSTEM FOR YOUTUBE API
-   ========================================================= */
-const CACHE_EXPIRE_TIME = 12 * 60 * 60 * 1000; // 12시간
-
 async function fetchYouTube(category) {
   const cfg = CATEGORIES[category];
   if (!cfg) throw new Error("bad_category");
-
-  // 1. 로컬 스토리지 캐시 확인
-  const cacheKey = `gwhsi_cache_${category}`;
-  const cachedData = localStorage.getItem(cacheKey);
-  
-  if (cachedData) {
-    try {
-      const { timestamp, data } = JSON.parse(cachedData);
-      if (Date.now() - timestamp < CACHE_EXPIRE_TIME) {
-        console.log(`[Cache Hit] ${category} 데이터를 캐시에서 불러왔습니다.`);
-        return data;
-      }
-    } catch (e) {
-      console.error("캐시 파싱 오류:", e);
-    }
-  }
-
-  // 2. 캐시 만료 시 API 호출
-  // 수동 키 확인 조건을 실제 API 키에 구애받지 않도록 기본 'YOUR_API_KEY' 문자열 여부만 검사하게 수정했습니다.
   if (!YT_API_KEY || YT_API_KEY.includes("YOUR_API_KEY")) {
     throw new Error("NO_API_KEY");
   }
@@ -1148,28 +1128,14 @@ async function fetchYouTube(category) {
     thumbnail: it.snippet.thumbnails?.medium?.url
   }));
 
-  let finalVideos = [];
+  // [v2.4 FIX] API 모드에서도 고이여름 영상을 맨 앞으로 고정하고 나머지만 슬롯에 셔플
   if (category === "mental") {
     const recVideo = CATEGORIES.mental.mock[0];
     const filtered = formatted.filter(it => it.videoId !== recVideo.videoId);
-    finalVideos = [recVideo, ...shuffleArray(filtered).slice(0, 5)];
-  } else {
-    finalVideos = shuffleArray(formatted).slice(0, 6);
+    return [recVideo, ...shuffleArray(filtered).slice(0, 5)];
   }
 
-  // 3. 데이터 캐싱 저장
-  try {
-    const cachePayload = {
-      timestamp: Date.now(),
-      data: finalVideos
-    };
-    localStorage.setItem(cacheKey, JSON.stringify(cachePayload));
-    console.log(`[Cache Save] ${category} 데이터가 로컬 스토리지에 캐싱되었습니다.`);
-  } catch (e) {
-    console.error("캐시 저장 오류:", e);
-  }
-
-  return finalVideos;
+  return shuffleArray(formatted).slice(0, 6);
 }
 
 async function loadCategory(category) {
@@ -1188,6 +1154,7 @@ async function loadCategory(category) {
       showStatus(`DUMP MODE OVERRIDE — 유튜브 통신 장애 (${err.message}) 에 대응하여 안전한 mock 버퍼를 출력합니다.`);
     }
     
+    // [v2.4 FIX] Mock 오프라인 상태에서도 수능 꿀팁 고정이 항상 첫 자리에 오도록 셔플 제어 적용
     const shuffledMock = shuffleArray(cfg.mock);
     renderCards(shuffledMock, category);
   }
@@ -1365,4 +1332,3 @@ loadCategory("lofi");
 </script>
 </body>
 </html>
-
