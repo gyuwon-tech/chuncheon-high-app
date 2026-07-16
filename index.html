@@ -773,7 +773,7 @@ footer {
    CORE CONFIG & DATA STRUCTURES
    ========================================================= */
 // 💡 [참고] API 할당량이 다 닳았다면 아래 키 값을 새로 발급받은 키로 교체해 주세요!
-const YT_API_KEY = "AIzaSyATH3qxHR3SjUZZTsvYy6qIBNvDqdT-JVg"; 
+const YT_API_KEY = "AIzaSyDkHWYIVMyB3kVj0Cyp5kGcV4XxExpx2Q0"; 
 const YT_ENDPOINT = "https://www.googleapis.com/youtube/v3/search";
 
 // 춘천고등학교 고3 학사일정 마스터 데이터 (99회 졸업식 적용)
@@ -1126,6 +1126,7 @@ async function fetchYouTube(category) {
   }
 
   // 2. 캐시 만료 시 API 호출
+  // 수동 키 확인 조건을 실제 API 키에 구애받지 않도록 기본 'YOUR_API_KEY' 문자열 여부만 검사하게 수정했습니다.
   if (!YT_API_KEY || YT_API_KEY.includes("YOUR_API_KEY")) {
     throw new Error("NO_API_KEY");
   }
