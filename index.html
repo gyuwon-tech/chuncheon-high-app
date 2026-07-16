@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#05070a" />
-<title>GW HSI v2.2 — 춘천고 3학년 대시보드</title>
+<title>GW HSI v2.3 — 춘천고 3학년 대시보드</title>
 <meta name="description" content="Gyuwon High School Information · 춘천고 고3 전용 수능 HUD, 학사일정, 점수 기록, 학습 큐레이션." />
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -465,17 +465,17 @@ tr:hover td { background: rgba(0, 255, 65, 0.02); }
 }
 .graph-section h3 { font-size: 12px; margin-bottom: 10px; font-family: var(--font-mono); color: var(--text-1); }
 
-/* [v2.2 FIX] PC 드래그 및 모바일 스와이프 지원 스크롤 래퍼 */
+/* PC 드래그 및 모바일 스와이프 지원 스크롤 래퍼 */
 .graph-scroll-container {
   width: 100%;
   overflow-x: auto;
   cursor: grab;
   user-select: none;
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: none; /* 파이어폭스 스크롤바 숨김 */
+  scrollbar-width: none;
 }
 .graph-scroll-container::-webkit-scrollbar {
-  display: none; /* 크롬, 사파리 스크롤바 숨김 */
+  display: none;
 }
 .graph-scroll-container:active {
   cursor: grabbing;
@@ -484,7 +484,7 @@ tr:hover td { background: rgba(0, 255, 65, 0.02); }
 .graph-container {
   display: flex;
   gap: 12px;
-  width: max-content; /* 내부 콘텐츠 길이에 맞게 확장 */
+  width: max-content;
   padding-bottom: 4px;
 }
 
@@ -496,7 +496,7 @@ tr:hover td { background: rgba(0, 255, 65, 0.02); }
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 250px; /* 고정 크기로 잘림 및 찌그러짐 원천 방지 */
+  width: 250px;
   flex-shrink: 0;
 }
 .graph-card__title { font-size: 11px; font-weight: 700; color: var(--text-1); margin-bottom: 6px; }
@@ -566,7 +566,7 @@ footer {
 
   <header>
     <div class="main-title">FOCUS.exe // CORE SYSTEM</div>
-    <div class="logo-gwhsi">GW HSI v2.2</div>
+    <div class="logo-gwhsi">GW HSI v2.3</div>
   </header>
 
   <div class="timer-grid">
@@ -749,7 +749,7 @@ footer {
 const YT_API_KEY = "AIzaSyATH3qxHR3SjUZZTsvYy6qIBNvDqdT-JVg"; 
 const YT_ENDPOINT = "https://www.googleapis.com/youtube/v3/search";
 
-// 춘천고등학교 고3 학사일정 마스터 데이터 (99회 졸업식으로 오류 수정 완료)
+// 춘천고등학교 고3 학사일정 마스터 데이터 (99회 졸업식 적용)
 const SCHOOL_CALENDAR = [
   { start: "2026-07-15", end: "2026-07-16", title: "상록제 (학교 축제)", tag: "학교행사" },
   { start: "2026-07-21", end: "2026-08-09", title: "하계방학 (여름방학)", tag: "방학일정" },
@@ -815,17 +815,22 @@ const CATEGORIES = {
     badge: "PSY",
     query: "SQ3R 공부법 고3 멘탈관리 수능",
     mock: [
+      // [v2.3 FIX] 제작자 고정 영상 마운트 (이동 링크 수동 활성화 지원)
+      { 
+        title: "🔥 [제작자 추천] 전직 수능 감독관이 알려주는 수능시험장 꿀팁 (학교에서 안 알려주는 것 위주)", 
+        channel: "고이여름", 
+        videoId: "HDFtf-cfzSw",
+        mockSeed: 99
+      },
       { title: "SQ3R 학습법 — 교과서 1번에 끝내는 5단계", channel: "공부심리연구소", mockSeed: 31 },
       { title: "고3 슬럼프, 뇌과학으로 5분 안에 빠져나오기", channel: "BRAIN STUDY", mockSeed: 32 },
       { title: "수능 D-100, 멘탈 무너질 때 보는 영상", channel: "고3멘토", mockSeed: 33 },
       { title: "서울대 합격생들이 추천하는 SQ3R 독서 실전", channel: "합격의길", mockSeed: 34 },
-      { title: "번아웃이 온 수험생을 위한 마음 챙김 가이드", channel: "힐링마인드", mockSeed: 35 },
-      { title: "기출회독의 기술 — 올바른 오답노트 작성법", channel: "상위1프로공부", mockSeed: 36 }
+      { title: "번아웃이 온 수험생을 위한 마음 챙김 가이드", channel: "힐링마인드", mockSeed: 35 }
     ]
   }
 };
 
-// [v2.2 FIX] 영어가 과목 분석 데이터 추이에 정상 노출되도록 추가
 const SUBJECTS = [
   { key: "kor", label: "국어", color: "#00ff41" },
   { key: "math", label: "수학", color: "#38bdf8" },
@@ -930,14 +935,42 @@ function hideStatus() {
 
 function shuffleArray(array) {
   const arr = [...array];
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+  // [v2.3 FIX] 맨 처음 고정 추천 영상은 셔플에서 제외
+  const hasFixed = arr[0] && arr[0].videoId === "HDFtf-cfzSw";
+  const startIdx = hasFixed ? 1 : 0;
+  
+  for (let i = arr.length - 1; i > startIdx; i--) {
+    const j = Math.floor(Math.random() * (i - startIdx + 1)) + startIdx;
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
   return arr;
 }
 
 function makeMockThumb(category, seed) {
+  // 고정 수능 팁 영상의 경우 유튜브 실제 썸네일 목업 생성
+  if (seed === 99) {
+    const svgSpec = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 270" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <linearGradient id="gSpecial" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#111622"/>
+            <stop offset="100%" stop-color="#05070a"/>
+          </linearGradient>
+        </defs>
+        <rect width="480" height="270" fill="url(#gSpecial)"/>
+        <circle cx="240" cy="135" r="50" fill="#00ff41" fill-opacity="0.2"/>
+        <polygon points="225,110 265,135 225,160" fill="#00ff41"/>
+        <text x="240" y="210" font-family="Noto Sans KR, sans-serif" font-size="16" font-weight="800" fill="#e7eaf2" text-anchor="middle">
+          수능 시험장 실전 꿀팁.avi
+        </text>
+        <text x="240" y="235" font-family="JetBrains Mono, monospace" font-size="11" fill="#00ff41" text-anchor="middle" letter-spacing="1">
+          // CREATOR RECOMMENDED
+        </text>
+      </svg>
+    `.trim();
+    return `data:image/svg+xml;utf8,${encodeURIComponent(svgSpec)}`;
+  }
+
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 270" preserveAspectRatio="xMidYMid slice">
       <defs>
@@ -972,8 +1005,11 @@ function renderCards(items, category) {
   const badge = CATEGORIES[category]?.badge || "QUEUE";
 
   items.forEach((item, idx) => {
+    // 덤프 모드더라도 특정 지정 영상(고이여름)은 실제 이동 링크를 타도록 이탈 예외 처리
+    const hasForceLink = item.videoId === "HDFtf-cfzSw";
     const isReal = !!item.videoId;
-    const href = isReal ? `https://www.youtube.com/watch?v=${item.videoId}` : "#";
+    const href = (isReal || hasForceLink) ? `https://www.youtube.com/watch?v=${item.videoId}` : "#";
+    
     const thumbEl = isReal && item.thumbnail
       ? `<img src="${item.thumbnail}" alt="" loading="lazy">`
       : `<img class="placeholder-thumb" src="${makeMockThumb(category, item.mockSeed || idx + 1)}" alt="">`;
@@ -981,7 +1017,7 @@ function renderCards(items, category) {
     const a = document.createElement("a");
     a.className = "card";
     a.href = href;
-    if (isReal) {
+    if (isReal || hasForceLink) {
       a.target = "_blank";
       a.rel = "noopener noreferrer";
     } else {
@@ -991,16 +1027,24 @@ function renderCards(items, category) {
       });
     }
 
+    // 추천 카드 스타일 테두리 강조
+    if (hasForceLink) {
+      a.style.borderColor = "var(--warn)";
+      a.style.boxShadow = "0 0 12px rgba(255, 209, 102, 0.15)";
+    }
+
     a.innerHTML = `
       <div class="card__thumb">
         ${thumbEl}
-        <span class="card__badge">${badge}</span>
+        <span class="card__badge" style="${hasForceLink ? 'background: #ffd166; color: #000; border-color: #ffd166;' : ''}">
+          ${hasForceLink ? 'REC ★' : badge}
+        </span>
       </div>
       <div class="card__body">
-        <h3 class="card__title">${escapeHtml(item.title)}</h3>
+        <h3 class="card__title" style="${hasForceLink ? 'color: var(--warn);' : ''}">${escapeHtml(item.title)}</h3>
         <div class="card__meta">
           <span class="card__channel">${escapeHtml(item.channel || "youtube.stream")}</span>
-          <span class="card__arrow">→</span>
+          <span class="card__arrow" style="${hasForceLink ? 'color: var(--warn);' : ''}">→ PLAY</span>
         </div>
       </div>
     `;
@@ -1052,6 +1096,13 @@ async function fetchYouTube(category) {
     videoId: it.id.videoId,
     thumbnail: it.snippet.thumbnails?.medium?.url
   }));
+
+  // [v2.3] API 통신 모드일 경우에도 제작자 추천 영상을 맨 앞으로 강제 배치
+  if (category === "mental") {
+    const recVideo = CATEGORIES.mental.mock[0];
+    const filtered = formatted.filter(it => it.videoId !== recVideo.videoId);
+    return [recVideo, ...shuffleArray(filtered).slice(0, 5)];
+  }
 
   return shuffleArray(formatted).slice(0, 6);
 }
@@ -1165,7 +1216,7 @@ function renderCharts(records) {
     let dots = "";
 
     if (validData.length >= 2) {
-      const width = 230; // 가로 길이에 유연하게 대응하도록 조정
+      const width = 230;
       const height = 80;
       const stepX = recent.length > 1 ? width / (recent.length - 1) : width;
 
@@ -1200,7 +1251,7 @@ function renderCharts(records) {
 }
 
 /* =========================================================
-   [v2.2 FIX] PC MOUSE DRAG TO SCROLL SCRIPT (터치와 감도 충돌 해결)
+   PC MOUSE DRAG TO SCROLL SCRIPT
    ========================================================= */
 const slider = document.getElementById('graphScrollContainer');
 let isDown = false;
@@ -1225,7 +1276,7 @@ slider.addEventListener('mousemove', (e) => {
   if(!isDown) return;
   e.preventDefault();
   const x = e.pageX - slider.offsetLeft;
-  const walk = (x - startX) * 1.5; // 드래그 가속도 조정
+  const walk = (x - startX) * 1.5;
   slider.scrollLeft = scrollLeft - walk;
 });
 
@@ -1248,3 +1299,4 @@ loadCategory("lofi");
 </script>
 </body>
 </html>
+
