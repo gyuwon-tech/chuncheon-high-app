@@ -1104,10 +1104,32 @@ function escapeHtml(str) {
   return String(str).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
 }
 
+// 캐시 유효 시간 설정 (12시간 = 12 * 60 * 60 * 1000 밀리초)
+const CACHE_EXPIRE_TIME = 12 * 60 * 60 * 1000; 
+
 async function fetchYouTube(category) {
   const cfg = CATEGORIES[category];
   if (!cfg) throw new Error("bad_category");
-  if (!YT_API_KEY || YT_API_KEY.includes("AIzaSyATH3qxHR3SjUZZTsvYy6qIBNvDqdT-JVg")) {
+
+  // 1. 로컬 스토리지에서 캐시 데이터 확인
+  const cacheKey = `gwhsi_cache_${category}`;
+  const cachedData = localStorage.getItem(cacheKey);
+  
+  if (cachedData) {
+    try {
+      const { timestamp, data } = JSON.parse(cachedData);
+      // 캐시가 아직 만료되지 않았다면 로컬 데이터를 즉시 반환
+      if (Date.now() - timestamp < CACHE_EXPIRE_TIME) {
+        console.log(`[Cache Hit] ${category} 데이터를 로컬에서 불러왔습니다.`);
+        return data;
+      }
+    } catch (e) {
+      console.error("캐시 데이터를 파싱하는 중 오류 발생:", e);
+    }
+  }
+
+  // 2. 캐시가 없거나 만료된 경우에만 API 호출 진행
+  if (!YT_API_KEY || YT_API_KEY.includes("YOUR_API_KEY")) {
     throw new Error("NO_API_KEY");
   }
 
@@ -1128,15 +1150,31 @@ async function fetchYouTube(category) {
     thumbnail: it.snippet.thumbnails?.medium?.url
   }));
 
-  // [v2.4 FIX] API 모드에서도 고이여름 영상을 맨 앞으로 고정하고 나머지만 슬롯에 셔플
+  // 멘탈 카테고리 고정 추천 영상 처리
+  let finalVideos = [];
   if (category === "mental") {
     const recVideo = CATEGORIES.mental.mock[0];
     const filtered = formatted.filter(it => it.videoId !== recVideo.videoId);
-    return [recVideo, ...shuffleArray(filtered).slice(0, 5)];
+    finalVideos = [recVideo, ...shuffleArray(filtered).slice(0, 5)];
+  } else {
+    finalVideos = shuffleArray(formatted).slice(0, 6);
   }
 
-  return shuffleArray(formatted).slice(0, 6);
+  // 3. 새로 받아온 데이터를 시간 정보와 함께 로컬 스토리지에 저장
+  try {
+    const cachePayload = {
+      timestamp: Date.now(),
+      data: finalVideos
+    };
+    localStorage.setItem(cacheKey, JSON.stringify(cachePayload));
+    console.log(`[Cache Save] ${category} 데이터가 캐시에 새로 저장되었습니다.`);
+  } catch (e) {
+    console.error("캐시 저장 중 오류 발생:", e);
+  }
+
+  return finalVideos;
 }
+
 
 async function loadCategory(category) {
   const cfg = CATEGORIES[category];
