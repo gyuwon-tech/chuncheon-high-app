@@ -1107,7 +1107,7 @@ function escapeHtml(str) {
 async function fetchYouTube(category) {
   const cfg = CATEGORIES[category];
   if (!cfg) throw new Error("bad_category");
-  if (!YT_API_KEY || YT_API_KEY.includes("YOUR_API_KEY")) {
+  if (!YT_API_KEY || YT_API_KEY.includes("AIzaSyATH3qxHR3SjUZZTsvYy6qIBNvDqdT-JVg")) {
     throw new Error("NO_API_KEY");
   }
 
