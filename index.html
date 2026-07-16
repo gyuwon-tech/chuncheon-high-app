@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#05070a" />
-<title>GW HSI v2.0 — 춘천고 3학년 대시보드</title>
+<title>GW HSI v2.1 — 춘천고 3학년 대시보드</title>
 <meta name="description" content="Gyuwon High School Information · 춘천고 고3 전용 수능 HUD, 학사일정, 점수 기록, 학습 큐레이션." />
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -37,8 +37,8 @@
   --font-mono: 'JetBrains Mono', monospace;
   --font-display: 'Orbitron', sans-serif;
 
-  --r-sm: 6px;
-  --r-md: 10px;
+  --r-sm: 8px;
+  --r-md: 12px;
   --r-lg: 16px;
 }
 
@@ -54,7 +54,8 @@ body {
   font-family: var(--font-sans);
   font-weight: 500;
   line-height: 1.55;
-  padding: 20px 16px 80px;
+  padding: 16px 14px 60px;
+  -webkit-text-size-adjust: 100%;
 
   background-image:
     radial-gradient(ellipse 70% 50% at 50% -10%, rgba(0, 255, 65, 0.08), transparent 60%),
@@ -65,7 +66,11 @@ body {
   background-attachment: fixed;
 }
 
-button { font-family: inherit; cursor: pointer; }
+button, input, select {
+  font-family: inherit;
+  touch-action: manipulation; /* 더블탭 줌 방지 */
+}
+button { cursor: pointer; }
 a { color: inherit; text-decoration: none; }
 
 .wrap {
@@ -73,7 +78,7 @@ a { color: inherit; text-decoration: none; }
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 /* =========================================================
@@ -85,15 +90,14 @@ header {
   align-items: center;
   border: 1px solid var(--line);
   background: var(--bg-1);
-  padding: 16px 20px;
+  padding: 14px 18px;
   border-radius: var(--r-md);
   box-shadow: 0 0 15px rgba(0, 255, 65, 0.03);
-  position: relative;
 }
 .main-title {
   font-family: var(--font-display);
   color: var(--text-0);
-  font-size: 18px;
+  font-size: 16px;
   letter-spacing: 1px;
   font-weight: 700;
 }
@@ -101,12 +105,12 @@ header {
   font-family: var(--font-display);
   color: var(--neon-green);
   border: 1px solid var(--neon-green);
-  padding: 4px 12px;
+  padding: 4px 10px;
   border-radius: 4px;
   font-weight: bold;
   text-shadow: 0 0 8px var(--neon-green);
   box-shadow: 0 0 8px var(--neon-green-dim);
-  font-size: 13px;
+  font-size: 12px;
 }
 
 /* =========================================================
@@ -115,42 +119,42 @@ header {
 .timer-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 16px;
 }
 @media (max-width: 768px) {
-  .timer-grid { grid-template-columns: 1fr; gap: 14px; }
+  .timer-grid { grid-template-columns: 1fr; gap: 12px; }
 }
 .timer-card {
   border: 1px solid var(--line);
   background: var(--bg-1);
-  padding: 20px;
+  padding: 16px;
   border-radius: var(--r-md);
   text-align: center;
-  position: relative;
 }
 .timer-card h3 {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-1);
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 .timer-display {
   font-family: var(--font-display);
-  font-size: clamp(24px, 5vw, 36px);
+  font-size: clamp(20px, 4.8vw, 32px);
   font-weight: 700;
   color: var(--neon-green);
   text-shadow: 0 0 12px rgba(0,255,65,0.35);
 }
 
 /* =========================================================
-   TAB SYSTEM NAVIGATION
+   TAB SYSTEM NAVIGATION (TOUCH ACTION COMPATIBLE)
    ========================================================= */
 .tabs {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   overflow-x: auto;
-  padding-bottom: 4px;
+  padding-bottom: 6px;
+  -webkit-overflow-scrolling: touch;
 }
 .tabs::-webkit-scrollbar { height: 4px; }
 .tabs::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 2px; }
@@ -159,15 +163,16 @@ header {
   background: var(--bg-2);
   border: 1px solid var(--line);
   color: var(--text-1);
-  padding: 12px 22px;
+  padding: 14px 20px; /* 대형 터치 타겟 확보 */
   border-radius: var(--r-sm);
   cursor: pointer;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 13px;
   white-space: nowrap;
   transition: all 0.2s ease;
   font-family: var(--font-display), var(--font-sans);
   letter-spacing: 0.05em;
+  min-height: 44px; /* 모바일 권장 최소 터치 규격 */
 }
 .tab-btn:hover:not(.active) {
   background: var(--bg-3);
@@ -185,21 +190,24 @@ header {
   display: none;
   border: 1px solid var(--line);
   background: var(--bg-1);
-  padding: 24px;
+  padding: 16px;
   border-radius: var(--r-md);
-  min-height: 400px;
+  min-height: 380px;
+}
+@media (min-width: 768px) {
+  .tab-content { padding: 24px; }
 }
 .tab-content.active { display: block; animation: fadeIn 0.3s ease forwards; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
 .tab-content h2 {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
   color: var(--text-0);
   font-family: var(--font-sans);
   border-left: 3px solid var(--neon-green);
-  padding-left: 10px;
+  padding-left: 8px;
   line-height: 1.2;
 }
 
@@ -208,34 +216,38 @@ header {
    ========================================================= */
 .filters {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 8px;
-  margin-bottom: 24px;
-  padding: 8px;
+  margin-bottom: 20px;
+  padding: 6px;
   background: var(--bg-2);
   border: 1px solid var(--line);
   border-radius: var(--r-md);
+}
+@media (min-width: 600px) {
+  .filters { grid-template-columns: repeat(4, 1fr); }
 }
 .chip {
   appearance: none;
   border: 1px solid transparent;
   background: transparent;
   color: var(--text-1);
-  padding: 12px 8px;
+  padding: 10px 6px;
   border-radius: var(--r-sm);
   transition: all 0.18s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
+  min-height: 52px; /* 확실한 손가락 터치 반경 */
 }
-.chip__emoji { font-size: 18px; line-height: 1; }
-.chip__label { font-size: 13px; font-weight: 700; }
+.chip__emoji { font-size: 16px; line-height: 1; }
+.chip__label { font-size: 12px; font-weight: 700; }
 .chip__mono {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 9px;
   color: var(--text-2);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
 }
 .chip:hover:not(.is-active) {
   background: var(--bg-3);
@@ -259,7 +271,7 @@ header {
   border: 1px solid var(--line-strong);
   background: rgba(255, 209, 102, 0.05);
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 11px;
   color: var(--warn);
 }
 .statusbar.is-visible { display: flex; }
@@ -273,20 +285,20 @@ header {
 
 .section-title {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 11px;
   letter-spacing: 0.12em;
   color: var(--text-1);
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   text-transform: uppercase;
 }
 
 .video-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 16px;
+  gap: 14px;
 }
-@media (min-width: 650px) { .video-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 950px) { .video-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 580px) { .video-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 900px) { .video-grid { grid-template-columns: repeat(3, 1fr); } }
 
 .card {
   background: var(--bg-2);
@@ -322,7 +334,7 @@ header {
   position: absolute;
   bottom: 8px; right: 8px;
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
   background: rgba(5, 7, 10, 0.85);
   color: var(--neon-green);
@@ -331,10 +343,10 @@ header {
   border: 1px solid rgba(0, 255, 65, 0.3);
   backdrop-filter: blur(4px);
 }
-.card__body { padding: 14px; }
+.card__body { padding: 12px; }
 .card__title {
   margin: 0 0 10px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   line-height: 1.45;
   color: var(--text-0);
@@ -345,7 +357,7 @@ header {
 }
 .card__meta {
   display: flex; justify-content: space-between; align-items: center;
-  font-size: 12px;
+  font-size: 11px;
 }
 .card__channel {
   font-family: var(--font-mono); color: var(--text-1);
@@ -353,33 +365,25 @@ header {
 }
 .card__arrow { color: var(--neon-green); font-family: var(--font-mono); font-weight: 700; }
 
-/* 스켈레톤 */
-.card--skeleton { pointer-events: none; }
-.skeleton-block {
-  background: linear-gradient(90deg, var(--bg-2) 0%, var(--bg-3) 50%, var(--bg-2) 100%);
-  background-size: 200% 100%;
-  animation: shimmer 1.2s linear infinite;
-  border-radius: 4px;
-}
-@keyframes shimmer { to { background-position: -200% 0; } }
-.card--skeleton .card__thumb .skeleton-block { width: 100%; height: 100%; border-radius: 0; }
-.card--skeleton .skel-title { height: 14px; width: 90%; margin-bottom: 8px; }
-.card--skeleton .skel-title.short { width: 60%; }
-.card--skeleton .skel-meta { height: 12px; width: 40%; margin-top: 14px; }
-
-.empty { text-align: center; padding: 40px; color: var(--text-2); font-family: var(--font-mono); }
-
 /* =========================================================
-   TABLES & COMMON TAB CONTENTS
+   TABLES & COMMON TAB CONTENTS (TOUCH SCROLL OPTIMIZED)
    ========================================================= */
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--bg-1);
+}
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 10px;
-  font-size: 14px;
+  font-size: 13px;
+  min-width: 500px; /* 모바일에서 찌그러짐 방지, 가로 스크롤 유도 */
 }
 th, td {
-  border: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
   padding: 12px 14px;
   text-align: left;
 }
@@ -389,35 +393,36 @@ th {
   font-family: var(--font-mono), var(--font-sans);
   font-weight: 700;
 }
+tr:last-child td { border-bottom: none; }
 tr:hover td { background: rgba(0, 255, 65, 0.02); }
 
 /* =========================================================
-   TAB: SCORE CALCULATOR & GRAPH DASHBOARD
+   TAB: SCORE CALCULATOR & GRAPH DASHBOARD (RESPONSIVE GRID)
    ========================================================= */
 .calc-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 24px;
+  gap: 16px;
 }
-@media (min-width: 850px) { .calc-grid { grid-template-columns: 360px 1fr; } }
+@media (min-width: 880px) { .calc-grid { grid-template-columns: 320px 1fr; } }
 
 .calc-form {
   background: var(--bg-2);
   border: 1px solid var(--line);
-  padding: 20px;
+  padding: 16px;
   border-radius: var(--r-md);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
-.calc-form h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; color: var(--neon-green); }
+.calc-form h3 { font-size: 14px; font-weight: 700; margin-bottom: 4px; color: var(--neon-green); }
 
 .input-group {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-.input-group label { font-size: 14px; color: var(--text-0); font-weight: 500; }
+.input-group label { font-size: 13px; color: var(--text-0); font-weight: 500; }
 .input-group select,
 .input-group input {
   background: var(--bg-0);
@@ -428,41 +433,41 @@ tr:hover td { background: rgba(0, 255, 65, 0.02); }
   font-family: var(--font-mono);
   outline: none;
   text-align: center;
+  min-height: 38px; /* 모바일 터치 가독성 */
 }
-.input-group select { width: 140px; text-align-last: center; }
-.input-group input { width: 80px; }
+.input-group select { width: 130px; text-align-last: center; }
+.input-group input { width: 70px; }
 .input-group input:focus, .input-group select:focus { border-color: var(--neon-green); }
 
 .calc-btn {
   background: var(--neon-green);
   color: #000;
   border: none;
-  padding: 12px;
+  padding: 14px;
   border-radius: var(--r-sm);
   font-weight: 700;
-  font-size: 14px;
+  font-size: 13px;
   box-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
-  transition: opacity 0.2s;
+  min-height: 44px;
 }
-.calc-btn:hover { opacity: 0.9; }
 
 /* Dashboard display right panel */
 .calc-dashboard {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 .graph-section {
   background: var(--bg-2);
   border: 1px solid var(--line);
   border-radius: var(--r-md);
-  padding: 18px;
+  padding: 14px;
 }
-.graph-section h3 { font-size: 14px; margin-bottom: 12px; font-family: var(--font-mono); color: var(--text-1); }
+.graph-section h3 { font-size: 12px; margin-bottom: 10px; font-family: var(--font-mono); color: var(--text-1); }
 .graph-container {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 14px;
+  gap: 12px;
 }
 @media (min-width: 550px) { .graph-container { grid-template-columns: 1fr 1fr; } }
 
@@ -470,24 +475,25 @@ tr:hover td { background: rgba(0, 255, 65, 0.02); }
   background: var(--bg-0);
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
-  padding: 10px;
+  padding: 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
-.graph-card__title { font-size: 12px; font-weight: 700; color: var(--text-1); margin-bottom: 6px; }
-.graph-svg { width: 100%; height: 100px; background: rgba(255,255,255,0.01); }
+.graph-card__title { font-size: 11px; font-weight: 700; color: var(--text-1); margin-bottom: 6px; }
+.graph-svg { width: 100%; height: 90px; background: rgba(255,255,255,0.01); }
 
 .history-section {
   background: var(--bg-2);
   border: 1px solid var(--line);
   border-radius: var(--r-md);
-  padding: 18px;
+  padding: 14px;
 }
-.history-section h3 { font-size: 14px; margin-bottom: 12px; font-family: var(--font-mono); color: var(--text-1); }
+.history-section h3 { font-size: 12px; margin-bottom: 10px; font-family: var(--font-mono); color: var(--text-1); }
 .history-list {
-  max-height: 220px;
+  max-height: 180px;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -500,35 +506,37 @@ tr:hover td { background: rgba(0, 255, 65, 0.02); }
   border: 1px solid var(--line);
   padding: 10px 14px;
   border-radius: var(--r-sm);
-  font-size: 13px;
+  font-size: 12px;
   font-family: var(--font-mono);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   position: relative;
 }
-.history-item__top { display: flex; justify-content: space-between; color: var(--text-1); font-size: 12px; }
+.history-item__top { display: flex; justify-content: space-between; color: var(--text-1); font-size: 11px; margin-right: 35px; }
 .history-item__title { color: var(--text-0); font-weight: 700; }
-.history-item__scores { color: var(--neon-green); font-weight: 500; word-break: break-all; margin-top: 2px; }
+.history-item__scores { color: var(--neon-green); font-weight: 500; word-break: break-all; margin-top: 1px; }
 .score-del-btn {
-  position: absolute; right: 12px; bottom: 8px;
+  position: absolute; right: 8px; top: 50%;
+  transform: translateY(-50%);
   background: transparent; border: none; color: #ff6b6b; font-size: 11px; font-family: var(--font-sans);
+  padding: 8px; /* 터치 마진 추가 */
 }
 
 /* =========================================================
    FOOTER
    ========================================================= */
 footer {
-  margin-top: 20px;
-  padding-top: 20px;
+  margin-top: 16px;
+  padding-top: 16px;
   border-top: 1px dashed var(--line);
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text-2);
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
 }
 .foot__r .green { color: var(--neon-green); text-shadow: 0 0 4px var(--neon-green); }
 </style>
@@ -538,8 +546,8 @@ footer {
 <main class="wrap">
 
   <header>
-    <div class="main-title">FOCUS.exe // CORE CONTROLLER</div>
-    <div class="logo-gwhsi">GW HSI v2.0</div>
+    <div class="main-title">FOCUS.exe // CORE SYSTEM</div>
+    <div class="logo-gwhsi">GW HSI v2.1</div>
   </header>
 
   <div class="timer-grid">
@@ -564,7 +572,12 @@ footer {
     <h2>집중 및 알고리즘 타파 큐레이션</h2>
     
     <nav class="filters" aria-label="과목 카테고리 필터">
-      <button class="chip is-active" data-category="math" type="button">
+      <button class="chip is-active" data-category="lofi" type="button">
+        <span class="chip__emoji" aria-hidden="true">🎧</span>
+        <span class="chip__label">힐링 Lofi</span>
+        <span class="chip__mono">[ REST ]</span>
+      </button>
+      <button class="chip" data-category="math" type="button">
         <span class="chip__emoji" aria-hidden="true">📐</span>
         <span class="chip__label">수학 기출</span>
         <span class="chip__mono">[ MATH ]</span>
@@ -592,57 +605,61 @@ footer {
 
   <section id="schedule" class="tab-content">
     <h2>춘천고등학교 고3 하반기 주요일정 (7월~12월)</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>기간 / 날짜</th>
-          <th>학사일정 내용</th>
-          <th>분류 태그</th>
-        </tr>
-      </thead>
-      <tbody id="scheduleTableBody">
-        </tbody>
-    </table>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>기간 / 날짜</th>
+            <th>학사일정 내용</th>
+            <th>분류 태그</th>
+          </tr>
+        </thead>
+        <tbody id="scheduleTableBody">
+          </tbody>
+      </table>
+    </div>
   </section>
 
   <section id="timetable" class="tab-content">
     <h2>대학수학능력시험 표준 시간표</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>교시</th>
-          <th>시험 영역</th>
-          <th>운영 시간 (시험 시간)</th>
-          <th>문항수</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>1교시</td>
-          <td>국어</td>
-          <td>08:40 ~ 10:00 (80분)</td>
-          <td>45문항</td>
-        </tr>
-        <tr>
-          <td>2교시</td>
-          <td>수학</td>
-          <td>10:30 ~ 12:10 (1000분)</td>
-          <td>30문항</td>
-        </tr>
-        <tr>
-          <td>3교시</td>
-          <td>영어 (듣기포함)</td>
-          <td>13:10 ~ 14:20 (70분)</td>
-          <td>45문항</td>
-        </tr>
-        <tr>
-          <td>4교시</td>
-          <td>한국사, 사회/과학/직업탐구</td>
-          <td>14:50 ~ 16:37 (107분)</td>
-          <td>각 20문항</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>교시</th>
+            <th>시험 영역</th>
+            <th>운영 시간 (시험 시간)</th>
+            <th>문항수</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1교시</td>
+            <td>국어</td>
+            <td>08:40 ~ 10:00 (80분)</td>
+            <td>45문항</td>
+          </tr>
+          <tr>
+            <td>2교시</td>
+            <td>수학</td>
+            <td>10:30 ~ 12:10 (100분)</td>
+            <td>30문항</td>
+          </tr>
+          <tr>
+            <td>3교시</td>
+            <td>영어 (듣기포함)</td>
+            <td>13:10 ~ 14:20 (70분)</td>
+            <td>45문항</td>
+          </tr>
+          <tr>
+            <td>4교시</td>
+            <td>한국사, 사회/과학/직업탐구</td>
+            <td>14:50 ~ 16:37 (107분)</td>
+            <td>각 20문항</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </section>
 
   <section id="calculator" class="tab-content">
@@ -732,7 +749,21 @@ const SCHOOL_CALENDAR = [
   { date: "2026-12-29", title: "제98회 졸업식 (화요일 졸업)", tag: "졸업/수료" }
 ];
 
+// 각 카테고리별 6개씩 균형 맞추고 공부/Lofi 랜덤 셔플이 가능하도록 설계
 const CATEGORIES = {
+  lofi: {
+    label: "힐링 Lofi · 공부 및 휴식용 배경 사운드",
+    badge: "LOFI",
+    query: "lofi study beats chill background music",
+    mock: [
+      { title: "Lofi Hip Hop Radio 📚 - Beats to Relax/Study to", channel: "Lofi Girl", mockSeed: 1 },
+      { title: "Jazz lofi cafe music — 따스한 오후의 카페 음악", channel: "Cafe Music BGM", mockSeed: 2 },
+      { title: "한여름 밤의 고요한 방 — 감성 로파이 비트 모음", channel: "Chillhop Music", mockSeed: 3 },
+      { title: "수능 독서실 집중용 빗소리 로파이 3시간", channel: "Rainy Lofi", mockSeed: 4 },
+      { title: "비 오는 날의 한옥 로파이 — 마음을 가라앉히는 소리", channel: "한옥비트", mockSeed: 5 },
+      { title: "새벽녘 방 안의 조명 로파이 — 심야 집중 브금", channel: "Midnight Lofi", mockSeed: 6 }
+    ]
+  },
   math: {
     label: "수학 기출 · 킬러 해설 풀이",
     badge: "MATH",
@@ -740,7 +771,10 @@ const CATEGORIES = {
     mock: [
       { title: "[수능 수학] 22번 킬러 문항 5분 컷 풀이 전략", channel: "수학의별", mockSeed: 11 },
       { title: "2025 수능 미적분 30번 — 그래프로 직관 잡기", channel: "수학연구소", mockSeed: 12 },
-      { title: "확률과 통계 빈출 패턴 3가지 (9평 대비)", channel: "현우진 PICK", mockSeed: 13 }
+      { title: "확률과 통계 빈출 패턴 3가지 (9평 대비)", channel: "현우진 PICK", mockSeed: 13 },
+      { title: "수능 기하 29번 킬러 문제 빠른 보조선 긋기", channel: "도형마스터", mockSeed: 14 },
+      { title: "수학I 지수로그함수 격자점 문제 정공법 풀이", channel: "공부의신", mockSeed: 15 },
+      { title: "수학II 삼차함수 비율관계 실전 사용 설명서", channel: "정리끝판왕", mockSeed: 16 }
     ]
   },
   english: {
@@ -750,7 +784,10 @@ const CATEGORIES = {
     mock: [
       { title: "수능 영어 빈칸 — 글의 흐름으로 푸는 법", channel: "조정식 ENG", mockSeed: 21 },
       { title: "1등급의 순서 배열 사고 회로 공개", channel: "이명학T", mockSeed: 22 },
-      { title: "어법성 판단 5초 풀이 체크리스트", channel: "EBSi 영어", mockSeed: 23 }
+      { title: "어법성 판단 5초 풀이 체크리스트", channel: "EBSi 영어", mockSeed: 23 },
+      { title: "글의 흐름과 무관한 문장 — 소거법 3단계", channel: "영어의정석", mockSeed: 24 },
+      { title: "문장 삽입 문제 단서 단 한 줄로 찾기", channel: "구문스나이퍼", mockSeed: 25 },
+      { title: "EBS 연계 체감율 극대화 — 핵심 변형 단어 50개", channel: "수능영어마스터", mockSeed: 26 }
     ]
   },
   mental: {
@@ -760,7 +797,10 @@ const CATEGORIES = {
     mock: [
       { title: "SQ3R 학습법 — 교과서 1번에 끝내는 5단계", channel: "공부심리연구소", mockSeed: 31 },
       { title: "고3 슬럼프, 뇌과학으로 5분 안에 빠져나오기", channel: "BRAIN STUDY", mockSeed: 32 },
-      { title: "수능 D-100, 멘탈 무너질 때 보는 영상", channel: "고3멘토", mockSeed: 33 }
+      { title: "수능 D-100, 멘탈 무너질 때 보는 영상", channel: "고3멘토", mockSeed: 33 },
+      { title: "서울대 합격생들이 추천하는 SQ3R 독서 실전", channel: "합격의길", mockSeed: 34 },
+      { title: "번아웃이 온 수험생을 위한 마음 챙김 가이드", channel: "힐링마인드", mockSeed: 35 },
+      { title: "기출회독의 기술 — 올바른 오답노트 작성법", channel: "상위1프로공부", mockSeed: 36 }
     ]
   }
 };
@@ -847,7 +887,7 @@ function initScheduleTable() {
       <tr>
         <td style="font-family: var(--font-mono); font-weight: 500;">${dateLine}</td>
         <td style="font-weight: 700;">${item.title}</td>
-        <td><span style="color: var(--neon-green); font-size:12px; font-family:var(--font-mono)">[${item.tag}]</span></td>
+        <td><span style="color: var(--neon-green); font-size:11px; font-family:var(--font-mono)">[${item.tag}]</span></td>
       </tr>
     `;
   }).join("");
@@ -858,7 +898,7 @@ function formatDateStr(str) {
 }
 
 /* =========================================================
-   STUDY HUD: YOUTUBE API CARD PLAYER (1.0 100% 보존)
+   STUDY HUD: YOUTUBE API CARD PLAYER (1.0 100% 보존 + 셔플 추가)
    ========================================================= */
 function showStatus(msg) {
   $statusMsg.textContent = msg;
@@ -866,6 +906,16 @@ function showStatus(msg) {
 }
 function hideStatus() {
   $statusbar.classList.remove("is-visible");
+}
+
+// Fisher-Yates 랜덤 셔플 함수
+function shuffleArray(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
 }
 
 function makeMockThumb(category, seed) {
@@ -968,7 +1018,7 @@ async function fetchYouTube(category) {
   }
 
   const params = new URLSearchParams({
-    part: "snippet", q: cfg.query, type: "video", maxResults: "6",
+    part: "snippet", q: cfg.query, type: "video", maxResults: "10", // 셔플풀을 위해 조금 더 가져옵니다
     order: "relevance", regionCode: "KR", relevanceLanguage: "ko",
     safeSearch: "strict", key: YT_API_KEY
   });
@@ -977,12 +1027,14 @@ async function fetchYouTube(category) {
   if (!res.ok) throw new Error(`API_ERROR_${res.status}`);
   const data = await res.json();
   
-  return data.items.map(it => ({
+  const formatted = data.items.map(it => ({
     title: it.snippet.title,
     channel: it.snippet.channelTitle,
     videoId: it.id.videoId,
     thumbnail: it.snippet.thumbnails?.medium?.url
   }));
+
+  return shuffleArray(formatted).slice(0, 6); // API 응답 결과도 무작위로 섞어서 상위 6개 출력
 }
 
 async function loadCategory(category) {
@@ -996,11 +1048,13 @@ async function loadCategory(category) {
     renderCards(videos, category);
   } catch (err) {
     if (err.message === "NO_API_KEY") {
-      showStatus("DUMP MODE — 샌드박스 가상 데이터를 마운트했습니다. 실시간 API 연동을 하려면 스크립트 키 파트를 활성화하세요.");
+      showStatus("DUMP MODE — 무작위 학습 카드 버퍼를 셔플 마운트했습니다. 실시간 API 연동을 하려면 스크립트 키 파트를 활성화하세요.");
     } else {
       showStatus(`DUMP MODE OVERRIDE — 유튜브 통신 장애 (${err.message}) 에 대응하여 안전한 mock 버퍼를 출력합니다.`);
     }
-    renderCards(cfg.mock, category);
+    // 기본 탑재된 6개의 덤프 데이터를 랜덤하게 섞어 출력
+    const shuffledMock = shuffleArray(cfg.mock);
+    renderCards(shuffledMock, category);
   }
 }
 
@@ -1112,15 +1166,15 @@ function renderCharts(records) {
     card.className = "graph-card";
     card.innerHTML = `
       <div class="graph-card__title">${sub.label} 분석 스트림</div>
-      <svg class="graph-svg">
+      <svg class="graph-svg" viewBox="0 0 280 90" preserveAspectRatio="xMidYMid meet">
         <g stroke="rgba(255,255,255,0.05)" stroke-width="1">
-          <line x1="0" y1="20" x2="320" y2="20" />
-          <line x1="0" y1="50" x2="320" y2="50" />
-          <line x1="0" y1="80" x2="320" y2="80" />
+          <line x1="0" y1="20" x2="280" y2="20" />
+          <line x1="0" y1="50" x2="280" y2="50" />
+          <line x1="0" y1="80" x2="280" y2="80" />
         </g>
         <polyline fill="none" stroke="${sub.color}" stroke-width="2" points="${polylinePoints}" stroke-linejoin="round" stroke-linecap="round" />
         ${dots}
-        ${validData.length < 2 ? `<text x="50%" y="55%" font-size="12" fill="var(--text-2)" text-anchor="middle">// 데이터 부족 (2회 이상 입력 필요)</text>` : ''}
+        ${validData.length < 2 ? `<text x="50%" y="55%" font-size="11" fill="var(--text-2)" text-anchor="middle">// 데이터 부족 (2회 이상 입력 필요)</text>` : ''}
       </svg>
     `;
     $graphs.appendChild(card);
@@ -1142,7 +1196,8 @@ $chips.forEach(chip => {
    SYSTEM BOOT
    ========================================================= */
 initScheduleTable();
-loadCategory("math");
+loadCategory("lofi"); // 힐링 Lofi 카테고리를 메인 첫 로드로 지정
 </script>
 </body>
 </html>
+
