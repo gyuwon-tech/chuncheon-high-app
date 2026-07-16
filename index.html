@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#05070a" />
-<title>GW HSI v2.1 — 춘천고 3학년 대시보드</title>
+<title>GW HSI v2.2 — 춘천고 3학년 대시보드</title>
 <meta name="description" content="Gyuwon High School Information · 춘천고 고3 전용 수능 HUD, 학사일정, 점수 기록, 학습 큐레이션." />
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -68,7 +68,7 @@ body {
 
 button, input, select {
   font-family: inherit;
-  touch-action: manipulation; /* 더블탭 줌 방지 */
+  touch-action: manipulation;
 }
 button { cursor: pointer; }
 a { color: inherit; text-decoration: none; }
@@ -147,7 +147,7 @@ header {
 }
 
 /* =========================================================
-   TAB SYSTEM NAVIGATION (TOUCH ACTION COMPATIBLE)
+   TAB SYSTEM NAVIGATION
    ========================================================= */
 .tabs {
   display: flex;
@@ -163,7 +163,7 @@ header {
   background: var(--bg-2);
   border: 1px solid var(--line);
   color: var(--text-1);
-  padding: 14px 20px; /* 대형 터치 타겟 확보 */
+  padding: 14px 20px;
   border-radius: var(--r-sm);
   cursor: pointer;
   font-weight: 700;
@@ -172,7 +172,7 @@ header {
   transition: all 0.2s ease;
   font-family: var(--font-display), var(--font-sans);
   letter-spacing: 0.05em;
-  min-height: 44px; /* 모바일 권장 최소 터치 규격 */
+  min-height: 44px;
 }
 .tab-btn:hover:not(.active) {
   background: var(--bg-3);
@@ -239,7 +239,7 @@ header {
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  min-height: 52px; /* 확실한 손가락 터치 반경 */
+  min-height: 52px;
 }
 .chip__emoji { font-size: 16px; line-height: 1; }
 .chip__label { font-size: 12px; font-weight: 700; }
@@ -380,7 +380,7 @@ table {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
-  min-width: 500px; /* 모바일에서 찌그러짐 방지, 가로 스크롤 유도 */
+  min-width: 500px;
 }
 th, td {
   border-bottom: 1px solid var(--line);
@@ -397,7 +397,7 @@ tr:last-child td { border-bottom: none; }
 tr:hover td { background: rgba(0, 255, 65, 0.02); }
 
 /* =========================================================
-   TAB: SCORE CALCULATOR & GRAPH DASHBOARD (RESPONSIVE GRID)
+   TAB: SCORE CALCULATOR & GRAPH DASHBOARD
    ========================================================= */
 .calc-grid {
   display: grid;
@@ -433,7 +433,7 @@ tr:hover td { background: rgba(0, 255, 65, 0.02); }
   font-family: var(--font-mono);
   outline: none;
   text-align: center;
-  min-height: 38px; /* 모바일 터치 가독성 */
+  min-height: 38px;
 }
 .input-group select { width: 130px; text-align-last: center; }
 .input-group input { width: 70px; }
@@ -464,12 +464,29 @@ tr:hover td { background: rgba(0, 255, 65, 0.02); }
   padding: 14px;
 }
 .graph-section h3 { font-size: 12px; margin-bottom: 10px; font-family: var(--font-mono); color: var(--text-1); }
-.graph-container {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
+
+/* [v2.2 FIX] PC 드래그 및 모바일 스와이프 지원 스크롤 래퍼 */
+.graph-scroll-container {
+  width: 100%;
+  overflow-x: auto;
+  cursor: grab;
+  user-select: none;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* 파이어폭스 스크롤바 숨김 */
 }
-@media (min-width: 550px) { .graph-container { grid-template-columns: 1fr 1fr; } }
+.graph-scroll-container::-webkit-scrollbar {
+  display: none; /* 크롬, 사파리 스크롤바 숨김 */
+}
+.graph-scroll-container:active {
+  cursor: grabbing;
+}
+
+.graph-container {
+  display: flex;
+  gap: 12px;
+  width: max-content; /* 내부 콘텐츠 길이에 맞게 확장 */
+  padding-bottom: 4px;
+}
 
 .graph-card {
   background: var(--bg-0);
@@ -479,6 +496,8 @@ tr:hover td { background: rgba(0, 255, 65, 0.02); }
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 250px; /* 고정 크기로 잘림 및 찌그러짐 원천 방지 */
+  flex-shrink: 0;
 }
 .graph-card__title { font-size: 11px; font-weight: 700; color: var(--text-1); margin-bottom: 6px; }
 .graph-svg { width: 100%; height: 90px; background: rgba(255,255,255,0.01); }
@@ -520,7 +539,7 @@ tr:hover td { background: rgba(0, 255, 65, 0.02); }
   position: absolute; right: 8px; top: 50%;
   transform: translateY(-50%);
   background: transparent; border: none; color: #ff6b6b; font-size: 11px; font-family: var(--font-sans);
-  padding: 8px; /* 터치 마진 추가 */
+  padding: 8px;
 }
 
 /* =========================================================
@@ -547,7 +566,7 @@ footer {
 
   <header>
     <div class="main-title">FOCUS.exe // CORE SYSTEM</div>
-    <div class="logo-gwhsi">GW HSI v2.1</div>
+    <div class="logo-gwhsi">GW HSI v2.2</div>
   </header>
 
   <div class="timer-grid">
@@ -699,9 +718,11 @@ footer {
 
       <div class="calc-dashboard">
         <div class="graph-section">
-          <h3>// SUBJECT TREND LINES (최근 5회 기록 추이)</h3>
-          <div class="graph-container" id="graphs">
-            </div>
+          <h3>// SUBJECT TREND LINES (가로로 슬라이드하여 제어 가능)</h3>
+          <div class="graph-scroll-container" id="graphScrollContainer">
+            <div class="graph-container" id="graphs">
+              </div>
+          </div>
         </div>
 
         <div class="history-section">
@@ -728,7 +749,7 @@ footer {
 const YT_API_KEY = "AIzaSyATH3qxHR3SjUZZTsvYy6qIBNvDqdT-JVg"; 
 const YT_ENDPOINT = "https://www.googleapis.com/youtube/v3/search";
 
-// 확정된 2026 춘천고 3학년 학사일정 마스터 데이터 (오차 정정 완료)
+// 춘천고등학교 고3 학사일정 마스터 데이터 (99회 졸업식으로 오류 수정 완료)
 const SCHOOL_CALENDAR = [
   { start: "2026-07-15", end: "2026-07-16", title: "상록제 (학교 축제)", tag: "학교행사" },
   { start: "2026-07-21", end: "2026-08-09", title: "하계방학 (여름방학)", tag: "방학일정" },
@@ -746,10 +767,9 @@ const SCHOOL_CALENDAR = [
   { date: "2026-11-19", title: "대망의 대학수학능력시험 (본수능 ★)", tag: "D-DAY" },
   { start: "2026-11-23", end: "2026-11-27", title: "3학년 2학기 2회고사 (기말고사)", tag: "지필평가" },
   { date: "2026-12-25", title: "성탄절 (크리스마스)", tag: "공휴일" },
-  { date: "2026-12-29", title: "제98회 졸업식 (화요일 졸업)", tag: "졸업/수료" }
+  { date: "2026-12-29", title: "제99회 졸업식 (화요일 졸업 ★)", tag: "졸업/수료" }
 ];
 
-// 각 카테고리별 6개씩 균형 맞추고 공부/Lofi 랜덤 셔플이 가능하도록 설계
 const CATEGORIES = {
   lofi: {
     label: "힐링 Lofi · 공부 및 휴식용 배경 사운드",
@@ -805,9 +825,11 @@ const CATEGORIES = {
   }
 };
 
+// [v2.2 FIX] 영어가 과목 분석 데이터 추이에 정상 노출되도록 추가
 const SUBJECTS = [
   { key: "kor", label: "국어", color: "#00ff41" },
-  { key: "math", label: "수학", color: "#38bdf8" }
+  { key: "math", label: "수학", color: "#38bdf8" },
+  { key: "eng", label: "영어", color: "#ff8138" }
 ];
 
 /* =========================================================
@@ -835,12 +857,11 @@ function switchTab(tabId) {
 }
 
 /* =========================================================
-   REALTIME MILLISECOND DUAL TIMERS LOGIC (2.0 UI 발전)
+   REALTIME MILLISECOND DUAL TIMERS LOGIC
    ========================================================= */
 function tickTimers() {
   const now = new Date();
   
-  // 1. 수능 타이머 (2026년 11월 19일 목요일 08:40 입실 완료 기준)
   const suneungTarget = new Date('2026-11-19T08:40:00');
   const diffSuneung = suneungTarget - now;
   
@@ -854,7 +875,6 @@ function tickTimers() {
     document.getElementById('suneung-timer').innerText = "SYSTEM COMPLETE // MISSION EXECUTED";
   }
 
-  // 2. 7월 잔여 시간 타이머 (2026년 7월 31일 23:59:59 타겟)
   const endJulyTarget = new Date('2026-07-31T23:59:59');
   const diffJuly = endJulyTarget - now;
   
@@ -898,7 +918,7 @@ function formatDateStr(str) {
 }
 
 /* =========================================================
-   STUDY HUD: YOUTUBE API CARD PLAYER (1.0 100% 보존 + 셔플 추가)
+   STUDY HUD: YOUTUBE API CARD PLAYER
    ========================================================= */
 function showStatus(msg) {
   $statusMsg.textContent = msg;
@@ -908,7 +928,6 @@ function hideStatus() {
   $statusbar.classList.remove("is-visible");
 }
 
-// Fisher-Yates 랜덤 셔플 함수
 function shuffleArray(array) {
   const arr = [...array];
   for (let i = arr.length - 1; i > 0; i--) {
@@ -1018,7 +1037,7 @@ async function fetchYouTube(category) {
   }
 
   const params = new URLSearchParams({
-    part: "snippet", q: cfg.query, type: "video", maxResults: "10", // 셔플풀을 위해 조금 더 가져옵니다
+    part: "snippet", q: cfg.query, type: "video", maxResults: "10",
     order: "relevance", regionCode: "KR", relevanceLanguage: "ko",
     safeSearch: "strict", key: YT_API_KEY
   });
@@ -1034,7 +1053,7 @@ async function fetchYouTube(category) {
     thumbnail: it.snippet.thumbnails?.medium?.url
   }));
 
-  return shuffleArray(formatted).slice(0, 6); // API 응답 결과도 무작위로 섞어서 상위 6개 출력
+  return shuffleArray(formatted).slice(0, 6);
 }
 
 async function loadCategory(category) {
@@ -1052,14 +1071,13 @@ async function loadCategory(category) {
     } else {
       showStatus(`DUMP MODE OVERRIDE — 유튜브 통신 장애 (${err.message}) 에 대응하여 안전한 mock 버퍼를 출력합니다.`);
     }
-    // 기본 탑재된 6개의 덤프 데이터를 랜덤하게 섞어 출력
     const shuffledMock = shuffleArray(cfg.mock);
     renderCards(shuffledMock, category);
   }
 }
 
 /* =========================================================
-   SCORE CALCULATOR HUD DASHBOARD LOGIC (1.0 SVG + 2.0 LIST 결합)
+   SCORE CALCULATOR HUD DASHBOARD LOGIC
    ========================================================= */
 function getRecords() {
   return JSON.parse(localStorage.getItem("gwhsi_score_records")) || [];
@@ -1147,7 +1165,7 @@ function renderCharts(records) {
     let dots = "";
 
     if (validData.length >= 2) {
-      const width = 280;
+      const width = 230; // 가로 길이에 유연하게 대응하도록 조정
       const height = 80;
       const stepX = recent.length > 1 ? width / (recent.length - 1) : width;
 
@@ -1166,20 +1184,50 @@ function renderCharts(records) {
     card.className = "graph-card";
     card.innerHTML = `
       <div class="graph-card__title">${sub.label} 분석 스트림</div>
-      <svg class="graph-svg" viewBox="0 0 280 90" preserveAspectRatio="xMidYMid meet">
+      <svg class="graph-svg" viewBox="0 0 230 90" preserveAspectRatio="xMidYMid meet">
         <g stroke="rgba(255,255,255,0.05)" stroke-width="1">
-          <line x1="0" y1="20" x2="280" y2="20" />
-          <line x1="0" y1="50" x2="280" y2="50" />
-          <line x1="0" y1="80" x2="280" y2="80" />
+          <line x1="0" y1="20" x2="230" y2="20" />
+          <line x1="0" y1="50" x2="230" y2="50" />
+          <line x1="0" y1="80" x2="230" y2="80" />
         </g>
         <polyline fill="none" stroke="${sub.color}" stroke-width="2" points="${polylinePoints}" stroke-linejoin="round" stroke-linecap="round" />
         ${dots}
-        ${validData.length < 2 ? `<text x="50%" y="55%" font-size="11" fill="var(--text-2)" text-anchor="middle">// 데이터 부족 (2회 이상 입력 필요)</text>` : ''}
+        ${validData.length < 2 ? `<text x="50%" y="55%" font-size="11" fill="var(--text-2)" text-anchor="middle" font-family="var(--font-sans)">// 데이터 2회 이상 필요</text>` : ''}
       </svg>
     `;
     $graphs.appendChild(card);
   });
 }
+
+/* =========================================================
+   [v2.2 FIX] PC MOUSE DRAG TO SCROLL SCRIPT (터치와 감도 충돌 해결)
+   ========================================================= */
+const slider = document.getElementById('graphScrollContainer');
+let isDown = false;
+let startX;
+let scrollLeft;
+
+slider.addEventListener('mousedown', (e) => {
+  isDown = true;
+  slider.classList.add('active');
+  startX = e.pageX - slider.offsetLeft;
+  scrollLeft = slider.scrollLeft;
+});
+slider.addEventListener('mouseleave', () => {
+  isDown = false;
+  slider.classList.remove('active');
+});
+slider.addEventListener('mouseup', () => {
+  isDown = false;
+  slider.classList.remove('active');
+});
+slider.addEventListener('mousemove', (e) => {
+  if(!isDown) return;
+  e.preventDefault();
+  const x = e.pageX - slider.offsetLeft;
+  const walk = (x - startX) * 1.5; // 드래그 가속도 조정
+  slider.scrollLeft = scrollLeft - walk;
+});
 
 /* =========================================================
    EVENT CHIP HANDLERS BINDINGS
@@ -1196,8 +1244,7 @@ $chips.forEach(chip => {
    SYSTEM BOOT
    ========================================================= */
 initScheduleTable();
-loadCategory("lofi"); // 힐링 Lofi 카테고리를 메인 첫 로드로 지정
+loadCategory("lofi");
 </script>
 </body>
 </html>
-
