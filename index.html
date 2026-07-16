@@ -1,397 +1,1148 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#0a0d14" />
-    <title>GW HSI — 춘천고 3학년 대시보드</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Noto+Sans+KR:wght@300;500;700&display=swap" rel="stylesheet">
-    
-    <style>
-        :root {
-            --bg-0: #05070a;
-            --bg-1: #0a0d14;
-            --bg-2: #111622;
-            --line: rgba(0, 255, 65, 0.15);
-            --neon-green: #00ff41;
-            --neon-green-dim: rgba(0, 255, 65, 0.15);
-            --text-0: #e7eaf2;
-            --text-1: #9ca3af;
-        }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#05070a" />
+<title>GW HSI v2.0 — 춘천고 3학년 대시보드</title>
+<meta name="description" content="Gyuwon High School Information · 춘천고 고3 전용 수능 HUD, 학사일정, 점수 기록, 학습 큐레이션." />
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            background-color: var(--bg-0);
-            color: var(--text-0);
-            font-family: 'Noto Sans KR', sans-serif;
-            min-height: 100vh;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;800&family=JetBrains+Mono:wght@400;500;700;800&family=Noto+Sans+KR:wght@300;500;700&display=swap" rel="stylesheet">
 
-        /* HEADER & LOGO */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid var(--line);
-            background: var(--bg-1);
-            padding: 15px 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 15px rgba(0, 255, 65, 0.05);
-        }
-        .main-title {
-            font-family: 'Orbitron', sans-serif;
-            color: var(--text-0);
-            font-size: 20px;
-            letter-spacing: 1px;
-        }
-        .logo-gwhsi {
-            font-family: 'Orbitron', sans-serif;
-            color: var(--neon-green);
-            border: 1px solid var(--neon-green);
-            padding: 4px 12px;
-            border-radius: 4px;
-            font-weight: bold;
-            text-shadow: 0 0 8px var(--neon-green);
-            box-shadow: 0 0 8px var(--neon-green-dim);
-            font-size: 14px;
-        }
+<style>
+/* =========================================================
+   DESIGN TOKENS (MATRIX GREEN THEME)
+   ========================================================= */
+:root {
+  --bg-0: #05070a;
+  --bg-1: #0a0d14;
+  --bg-2: #111622;
+  --bg-3: #181f30;
+  --line: rgba(0, 255, 65, 0.15);
+  --line-strong: rgba(0, 255, 65, 0.3);
 
-        /* TIMERS GRID */
-        .timer-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-        @media (max-width: 768px) {
-            .timer-grid { grid-template-columns: 1fr; }
-        }
-        .timer-card {
-            border: 1px solid var(--line);
-            background: var(--bg-1);
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-        }
-        .timer-card h3 {
-            font-size: 14px;
-            color: var(--text-1);
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .timer-display {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 32px;
-            color: var(--neon-green);
-            text-shadow: 0 0 10px rgba(0,255,65,0.3);
-        }
+  --text-0: #e7eaf2;
+  --text-1: #9ca3af;
+  --text-2: #626875;
 
-        /* TAB SYSTEM */
-        .tabs {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            padding-bottom: 5px;
-        }
-        .tab-btn {
-            background: var(--bg-2);
-            border: 1px solid var(--line);
-            color: var(--text-1);
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 500;
-            white-space: nowrap;
-            transition: all 0.2s;
-        }
-        .tab-btn.active {
-            background: var(--neon-green-dim);
-            color: var(--neon-green);
-            border-color: var(--neon-green);
-            text-shadow: 0 0 5px var(--neon-green);
-        }
-        .tab-content {
-            display: none;
-            border: 1px solid var(--line);
-            background: var(--bg-1);
-            padding: 20px;
-            border-radius: 8px;
-            flex-grow: 1;
-        }
-        .tab-content.active { display: block; }
+  --neon-green: #00ff41;
+  --neon-green-dim: rgba(0, 255, 65, 0.15);
+  --warn: #ffd166;
 
-        /* SCHEDULE & TABLE STYLING */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        th, td {
-            border: 1px solid rgba(0,255,65,0.1);
-            padding: 12px;
-            text-align: left;
-        }
-        th {
-            background: var(--bg-2);
-            color: var(--neon-green);
-            font-family: 'Orbitron', sans-serif;
-        }
-        tr:hover td { background: rgba(255,255,255,0.02); }
+  --glow-green: 0 0 0 1px rgba(0, 255, 65, 0.35), 0 8px 28px rgba(0, 255, 65, 0.15);
 
-        /* CALCULATOR & RECORD */
-        .calc-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-        @media (max-width: 768px) {
-            .calc-grid { grid-template-columns: 1fr; }
-        }
-        .input-group {
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .input-group label { color: var(--text-0); }
-        .input-group input {
-            background: var(--bg-0);
-            border: 1px solid var(--line);
-            color: var(--neon-green);
-            padding: 8px;
-            border-radius: 4px;
-            width: 80px;
-            text-align: center;
-            font-family: 'JetBrains Mono', monospace;
-        }
-        .calc-btn {
-            background: var(--neon-green);
-            color: #000;
-            border: none;
-            padding: 12px;
-            width: 100%;
-            border-radius: 4px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 0 10px var(--neon-green);
-        }
-        .history-list {
-            margin-top: 15px;
-            max-height: 200px;
-            overflow-y: auto;
-            border-top: 1px dashed var(--line);
-            padding-top: 10px;
-        }
-        .history-item {
-            background: var(--bg-2);
-            padding: 8px;
-            border-radius: 4px;
-            margin-bottom: 6px;
-            font-size: 13px;
-            font-family: 'JetBrains Mono', monospace;
-            display: flex;
-            justify-content: space-between;
-        }
+  --font-sans: 'Noto Sans KR', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-display: 'Orbitron', sans-serif;
 
-        /* YOUTUBE HUD SECTION */
-        .video-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-            margin-top: 15px;
-        }
-        .video-card {
-            background: var(--bg-2);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 6px;
-            overflow: hidden;
-        }
-        .video-card iframe { width: 100%; height: 180px; border: none; }
-    </style>
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 16px;
+}
+
+/* =========================================================
+   RESET & BASE
+   ========================================================= */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  min-height: 100vh;
+  background: var(--bg-0);
+  color: var(--text-0);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  line-height: 1.55;
+  padding: 20px 16px 80px;
+
+  background-image:
+    radial-gradient(ellipse 70% 50% at 50% -10%, rgba(0, 255, 65, 0.08), transparent 60%),
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: auto, 32px 32px, 32px 32px;
+  background-position: center top, center, center;
+  background-attachment: fixed;
+}
+
+button { font-family: inherit; cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+
+.wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* =========================================================
+   HEADER SYSTEM
+   ========================================================= */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid var(--line);
+  background: var(--bg-1);
+  padding: 16px 20px;
+  border-radius: var(--r-md);
+  box-shadow: 0 0 15px rgba(0, 255, 65, 0.03);
+  position: relative;
+}
+.main-title {
+  font-family: var(--font-display);
+  color: var(--text-0);
+  font-size: 18px;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+.logo-gwhsi {
+  font-family: var(--font-display);
+  color: var(--neon-green);
+  border: 1px solid var(--neon-green);
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-weight: bold;
+  text-shadow: 0 0 8px var(--neon-green);
+  box-shadow: 0 0 8px var(--neon-green-dim);
+  font-size: 13px;
+}
+
+/* =========================================================
+   TIMERS GRID
+   ========================================================= */
+.timer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+@media (max-width: 768px) {
+  .timer-grid { grid-template-columns: 1fr; gap: 14px; }
+}
+.timer-card {
+  border: 1px solid var(--line);
+  background: var(--bg-1);
+  padding: 20px;
+  border-radius: var(--r-md);
+  text-align: center;
+  position: relative;
+}
+.timer-card h3 {
+  font-size: 13px;
+  color: var(--text-1);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.timer-display {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 5vw, 36px);
+  font-weight: 700;
+  color: var(--neon-green);
+  text-shadow: 0 0 12px rgba(0,255,65,0.35);
+}
+
+/* =========================================================
+   TAB SYSTEM NAVIGATION
+   ========================================================= */
+.tabs {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+.tabs::-webkit-scrollbar { height: 4px; }
+.tabs::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 2px; }
+
+.tab-btn {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  color: var(--text-1);
+  padding: 12px 22px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 14px;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  font-family: var(--font-display), var(--font-sans);
+  letter-spacing: 0.05em;
+}
+.tab-btn:hover:not(.active) {
+  background: var(--bg-3);
+  color: var(--text-0);
+}
+.tab-btn.active {
+  background: var(--neon-green-dim);
+  color: var(--neon-green);
+  border-color: var(--neon-green);
+  text-shadow: 0 0 6px var(--neon-green);
+  box-shadow: var(--glow-green);
+}
+
+.tab-content {
+  display: none;
+  border: 1px solid var(--line);
+  background: var(--bg-1);
+  padding: 24px;
+  border-radius: var(--r-md);
+  min-height: 400px;
+}
+.tab-content.active { display: block; animation: fadeIn 0.3s ease forwards; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+.tab-content h2 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--text-0);
+  font-family: var(--font-sans);
+  border-left: 3px solid var(--neon-green);
+  padding-left: 10px;
+  line-height: 1.2;
+}
+
+/* =========================================================
+   TAB: STUDY HUD (VIDEO QUEUE)
+   ========================================================= */
+.filters {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 24px;
+  padding: 8px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+}
+.chip {
+  appearance: none;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-1);
+  padding: 12px 8px;
+  border-radius: var(--r-sm);
+  transition: all 0.18s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.chip__emoji { font-size: 18px; line-height: 1; }
+.chip__label { font-size: 13px; font-weight: 700; }
+.chip__mono {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-2);
+  letter-spacing: 0.06em;
+}
+.chip:hover:not(.is-active) {
+  background: var(--bg-3);
+  color: var(--text-0);
+}
+.chip.is-active {
+  background: var(--bg-3);
+  color: var(--neon-green);
+  border-color: var(--neon-green);
+  box-shadow: 0 0 10px rgba(0, 255, 65, 0.15);
+}
+.chip.is-active .chip__mono { color: var(--neon-green); }
+
+.statusbar {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  margin-bottom: 20px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line-strong);
+  background: rgba(255, 209, 102, 0.05);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--warn);
+}
+.statusbar.is-visible { display: flex; }
+.statusbar__icon {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--warn);
+  box-shadow: 0 0 10px var(--warn);
+  flex-shrink: 0;
+}
+.statusbar__msg { line-height: 1.45; }
+
+.section-title {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--text-1);
+  margin-bottom: 14px;
+  text-transform: uppercase;
+}
+
+.video-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+@media (min-width: 650px) { .video-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 950px) { .video-grid { grid-template-columns: repeat(3, 1fr); } }
+
+.card {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.card:hover {
+  border-color: var(--neon-green);
+  box-shadow: var(--glow-green);
+  transform: translateY(-2px);
+}
+.card__thumb {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: var(--bg-3);
+  overflow: hidden;
+}
+.card__thumb img,
+.card__thumb .placeholder-thumb {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.45s ease;
+}
+.card:hover .card__thumb img,
+.card:hover .card__thumb .placeholder-thumb {
+  transform: scale(1.04);
+}
+.card__badge {
+  position: absolute;
+  bottom: 8px; right: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(5, 7, 10, 0.85);
+  color: var(--neon-green);
+  padding: 3px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 255, 65, 0.3);
+  backdrop-filter: blur(4px);
+}
+.card__body { padding: 14px; }
+.card__title {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.45;
+  color: var(--text-0);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.card__meta {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 12px;
+}
+.card__channel {
+  font-family: var(--font-mono); color: var(--text-1);
+  max-width: 80%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.card__arrow { color: var(--neon-green); font-family: var(--font-mono); font-weight: 700; }
+
+/* 스켈레톤 */
+.card--skeleton { pointer-events: none; }
+.skeleton-block {
+  background: linear-gradient(90deg, var(--bg-2) 0%, var(--bg-3) 50%, var(--bg-2) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s linear infinite;
+  border-radius: 4px;
+}
+@keyframes shimmer { to { background-position: -200% 0; } }
+.card--skeleton .card__thumb .skeleton-block { width: 100%; height: 100%; border-radius: 0; }
+.card--skeleton .skel-title { height: 14px; width: 90%; margin-bottom: 8px; }
+.card--skeleton .skel-title.short { width: 60%; }
+.card--skeleton .skel-meta { height: 12px; width: 40%; margin-top: 14px; }
+
+.empty { text-align: center; padding: 40px; color: var(--text-2); font-family: var(--font-mono); }
+
+/* =========================================================
+   TABLES & COMMON TAB CONTENTS
+   ========================================================= */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 14px;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 12px 14px;
+  text-align: left;
+}
+th {
+  background: var(--bg-2);
+  color: var(--neon-green);
+  font-family: var(--font-mono), var(--font-sans);
+  font-weight: 700;
+}
+tr:hover td { background: rgba(0, 255, 65, 0.02); }
+
+/* =========================================================
+   TAB: SCORE CALCULATOR & GRAPH DASHBOARD
+   ========================================================= */
+.calc-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+@media (min-width: 850px) { .calc-grid { grid-template-columns: 360px 1fr; } }
+
+.calc-form {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  padding: 20px;
+  border-radius: var(--r-md);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.calc-form h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; color: var(--neon-green); }
+
+.input-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.input-group label { font-size: 14px; color: var(--text-0); font-weight: 500; }
+.input-group select,
+.input-group input {
+  background: var(--bg-0);
+  border: 1px solid var(--line);
+  color: var(--neon-green);
+  padding: 8px 10px;
+  border-radius: var(--r-sm);
+  font-family: var(--font-mono);
+  outline: none;
+  text-align: center;
+}
+.input-group select { width: 140px; text-align-last: center; }
+.input-group input { width: 80px; }
+.input-group input:focus, .input-group select:focus { border-color: var(--neon-green); }
+
+.calc-btn {
+  background: var(--neon-green);
+  color: #000;
+  border: none;
+  padding: 12px;
+  border-radius: var(--r-sm);
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
+  transition: opacity 0.2s;
+}
+.calc-btn:hover { opacity: 0.9; }
+
+/* Dashboard display right panel */
+.calc-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.graph-section {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: 18px;
+}
+.graph-section h3 { font-size: 14px; margin-bottom: 12px; font-family: var(--font-mono); color: var(--text-1); }
+.graph-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+@media (min-width: 550px) { .graph-container { grid-template-columns: 1fr 1fr; } }
+
+.graph-card {
+  background: var(--bg-0);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.graph-card__title { font-size: 12px; font-weight: 700; color: var(--text-1); margin-bottom: 6px; }
+.graph-svg { width: 100%; height: 100px; background: rgba(255,255,255,0.01); }
+
+.history-section {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: 18px;
+}
+.history-section h3 { font-size: 14px; margin-bottom: 12px; font-family: var(--font-mono); color: var(--text-1); }
+.history-list {
+  max-height: 220px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.history-list::-webkit-scrollbar { width: 4px; }
+.history-list::-webkit-scrollbar-thumb { background: var(--line); border-radius: 2px; }
+
+.history-item {
+  background: var(--bg-0);
+  border: 1px solid var(--line);
+  padding: 10px 14px;
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  font-family: var(--font-mono);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+}
+.history-item__top { display: flex; justify-content: space-between; color: var(--text-1); font-size: 12px; }
+.history-item__title { color: var(--text-0); font-weight: 700; }
+.history-item__scores { color: var(--neon-green); font-weight: 500; word-break: break-all; margin-top: 2px; }
+.score-del-btn {
+  position: absolute; right: 12px; bottom: 8px;
+  background: transparent; border: none; color: #ff6b6b; font-size: 11px; font-family: var(--font-sans);
+}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+footer {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px dashed var(--line);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-2);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.foot__r .green { color: var(--neon-green); text-shadow: 0 0 4px var(--neon-green); }
+</style>
 </head>
 <body>
 
-    <header>
-        <div class="main-title">FOCUS.exe // SYSTEM OVERVIEW</div>
-        <div class="logo-gwhsi">GW HSI v2.0</div>
-    </header>
+<main class="wrap">
 
-    <div class="timer-grid">
-        <div class="timer-card">
-            <h3>2027학년도 대학수능 D-DAY</h3>
-            <div class="timer-display" id="suneung-timer">D-000 00:00:00</div>
+  <header>
+    <div class="main-title">FOCUS.exe // CORE CONTROLLER</div>
+    <div class="logo-gwhsi">GW HSI v2.0</div>
+  </header>
+
+  <div class="timer-grid">
+    <div class="timer-card">
+      <h3>2027학년도 대학수학능력시험 COUNTDOWN</h3>
+      <div class="timer-display" id="suneung-timer">D-000 00:00:00</div>
+    </div>
+    <div class="timer-card">
+      <h3>7월 소중한 잔여 학습시간</h3>
+      <div class="timer-display" id="july-timer">00일 00:00:00</div>
+    </div>
+  </div>
+
+  <nav class="tabs" aria-label="메인 시스템 메뉴">
+    <button class="tab-btn active" onclick="switchTab('videos')">STUDY HUD</button>
+    <button class="tab-btn" onclick="switchTab('schedule')">학사일정 달력</button>
+    <button class="tab-btn" onclick="switchTab('timetable')">수능 시간표</button>
+    <button class="tab-btn" onclick="switchTab('calculator')">성적 계산/분석</button>
+  </nav>
+
+  <section id="videos" class="tab-content active">
+    <h2>집중 및 알고리즘 타파 큐레이션</h2>
+    
+    <nav class="filters" aria-label="과목 카테고리 필터">
+      <button class="chip is-active" data-category="math" type="button">
+        <span class="chip__emoji" aria-hidden="true">📐</span>
+        <span class="chip__label">수학 기출</span>
+        <span class="chip__mono">[ MATH ]</span>
+      </button>
+      <button class="chip" data-category="english" type="button">
+        <span class="chip__emoji" aria-hidden="true">🔤</span>
+        <span class="chip__label">영어 독해</span>
+        <span class="chip__mono">[ EN ]</span>
+      </button>
+      <button class="chip" data-category="mental" type="button">
+        <span class="chip__emoji" aria-hidden="true">🧠</span>
+        <span class="chip__label">멘탈 / SQ3R</span>
+        <span class="chip__mono">[ PSY ]</span>
+      </button>
+    </nav>
+
+    <div class="statusbar" id="statusbar" role="status">
+      <span class="statusbar__icon" aria-hidden="true"></span>
+      <span class="statusbar__msg" id="statusMsg"></span>
+    </div>
+
+    <div class="section-title" id="sectionTitle">// queue init ...</div>
+    <div class="video-grid" id="grid" aria-live="polite"></div>
+  </section>
+
+  <section id="schedule" class="tab-content">
+    <h2>춘천고등학교 고3 하반기 주요일정 (7월~12월)</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>기간 / 날짜</th>
+          <th>학사일정 내용</th>
+          <th>분류 태그</th>
+        </tr>
+      </thead>
+      <tbody id="scheduleTableBody">
+        </tbody>
+    </table>
+  </section>
+
+  <section id="timetable" class="tab-content">
+    <h2>대학수학능력시험 표준 시간표</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>교시</th>
+          <th>시험 영역</th>
+          <th>운영 시간 (시험 시간)</th>
+          <th>문항수</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1교시</td>
+          <td>국어</td>
+          <td>08:40 ~ 10:00 (80분)</td>
+          <td>45문항</td>
+        </tr>
+        <tr>
+          <td>2교시</td>
+          <td>수학</td>
+          <td>10:30 ~ 12:10 (1000분)</td>
+          <td>30문항</td>
+        </tr>
+        <tr>
+          <td>3교시</td>
+          <td>영어 (듣기포함)</td>
+          <td>13:10 ~ 14:20 (70분)</td>
+          <td>45문항</td>
+        </tr>
+        <tr>
+          <td>4교시</td>
+          <td>한국사, 사회/과학/직업탐구</td>
+          <td>14:50 ~ 16:37 (107분)</td>
+          <td>각 20문항</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="calculator" class="tab-content">
+    <h2>지능형 모의고사 가채점 분석 피드</h2>
+    <div class="calc-grid">
+      
+      <form class="calc-form" onsubmit="handleScoreSubmit(event)">
+        <h3>원점수 입력 매트릭스</h3>
+        
+        <div class="input-group">
+          <label for="score-label">시험 분류 선택</label>
+          <select id="score-label">
+            <option value="auto">📅 날짜 기반 자동 감지</option>
+            <option value="9월 모의평가">9월 모의평가</option>
+            <option value="10월 학력평가">10월 학력평가</option>
+            <option value="2학기 중간고사">2학기 중간고사</option>
+            <option value="2학기 기말고사">2학기 기말고사</option>
+            <option value="자율학습 기록">자율학습 기록</option>
+          </select>
         </div>
-        <div class="timer-card">
-            <h3>7월 잔여 소중한 시간</h3>
-            <div class="timer-display" id="july-timer">00일 00:00:00</div>
+        
+        <div class="input-group">
+          <label for="score-kor">국어 점수</label>
+          <input type="number" id="score-kor" min="0" max="100" placeholder="100" />
         </div>
-    </div>
-
-    <div class="tabs">
-        <button class="tab-btn active" onclick="openTab('videos')">STUDY HUD</button>
-        <button class="tab-btn" onclick="openTab('schedule')">학사일정 달력</button>
-        <button class="tab-btn" onclick="openTab('timetable')">수능 시간표</button>
-        <button class="tab-btn" onclick="openTab('calculator')">성적 계산/기록</button>
-    </div>
-
-    <div id="videos" class="tab-content active">
-        <h3>집중 및 동기부여 큐레이션</h3>
-        <div class="video-grid">
-            <div class="video-card"><iframe src="https://www.youtube.com/embed/5qap5aO4i9A"></iframe></div>
-            <div class="video-card"><iframe src="https://www.youtube.com/embed/tw1mPzsw9SM"></iframe></div>
-            <div class="video-card"><iframe src="https://www.youtube.com/embed/T4_bgnf7cO0"></iframe></div>
+        <div class="input-group">
+          <label for="score-math">수학 점수</label>
+          <input type="number" id="score-math" min="0" max="100" placeholder="100" />
         </div>
-    </div>
+        <div class="input-group">
+          <label for="score-eng">영어 점수</label>
+          <input type="number" id="score-eng" min="0" max="100" placeholder="100" />
+        </div>
+        
+        <button type="submit" class="calc-btn">시스템에 성적 마운트</button>
+      </form>
 
-    <div id="schedule" class="tab-content">
-        <h3>춘천고 고3 주요 학사일정 (7월~)</h3>
-        <table>
-            <thead>
-                <tr><th>날짜</th><th>일정 내용</th><th>분류</th></tr>
-            </thead>
-            <tbody>
-                <tr><td>2026.07.23</td><td>여름방학식</td><td>학교행사</td></tr>
-                <tr><td>2026.09.02</td><td>9월 대학수학능력시험 모의평가</td><td>시험(평가원)</td></tr>
-                <tr><td>2026.10.20</td><td>10월 전국연합학력평가</td><td>시험(교육청)</td></tr>
-                <tr><td>2026.11.19</td><td>2027학년도 대학수학능력시험</td><td>본수능</td></tr>
-                <tr><td>2026.12.30</td><td>대망의 졸업식</td><td>학교행사</td></tr>
-            </tbody>
-        </table>
-    </div>
-
-    <div id="timetable" class="tab-content">
-        <h3>대학수학능력시험 표준 시간표</h3>
-        <table>
-            <thead>
-                <tr><th>교시</th><th>영역</th><th>시간</th><th>문항수</th></tr>
-            </thead>
-            <tbody>
-                <tr><td>1교시</td><td>국어</td><td>08:40 ~ 10:00 (80분)</td><td>45문항</td></tr>
-                <tr><td>2교시</td><td>수학</td><td>10:30 ~ 12:10 (100분)</td><td>30문항</td></tr>
-                <tr><td>3교시</td><td>영어</td><td>13:10 ~ 14:20 (70분)</td><td>45문항</td></tr>
-                <tr><td>4교시</td><td>한국사/탐구</td><td>14:50 ~ 16:37 (107분)</td><td>각 20문항</td></tr>
-            </tbody>
-        </table>
-    </div>
-
-    <div id="calculator" class="tab-content">
-        <div class="calc-grid">
-            <div>
-                <h3>가채점 등급 계산기 <span style="font-size:11px; color:var(--text-1);">(참고용)</span></h3>
-                <div class="input-group"><label>국어 (원점수)</label><input type="number" id="score-kor" placeholder="100"></div>
-                <div class="input-group"><label>수학 (원점수)</label><input type="number" id="score-math" placeholder="100"></div>
-                <div class="input-group"><label>영어 (원점수)</label><input type="number" id="score-eng" placeholder="100"></div>
-                <div class="input-group"><label>탐구1 (원점수)</label><input type="number" id="score-sub1" placeholder="50"></div>
-                <div class="input-group"><label>탐구2 (원점수)</label><input type="number" id="score-sub2" placeholder="50"></div>
-                <button class="calc-btn" onclick="saveScores()">점수 기록 및 저장</button>
+      <div class="calc-dashboard">
+        <div class="graph-section">
+          <h3>// SUBJECT TREND LINES (최근 5회 기록 추이)</h3>
+          <div class="graph-container" id="graphs">
             </div>
-            <div>
-                <h3>누적 성적 분석 피드</h3>
-                <div class="history-list" id="history-container">
-                    </div>
+        </div>
+
+        <div class="history-section">
+          <h3>// TRANSACTION LOGS</h3>
+          <div class="history-list" id="scoreList">
             </div>
         </div>
+      </div>
+
     </div>
+  </section>
 
-    <script>
-        // YOUTUBE API KEY CONTAINER (기존 설정 보존용 더미 변수)
-        const YT_API_KEY = "YOUR_API_KEY_HERE";
+  <footer>
+    <div>// developed for chuncheon high school · stay focused</div>
+    <div class="foot__r">terminal console status: <span class="green">online.ok</span></div>
+  </footer>
 
-        // TABS NAVIGATION
-        function openTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            event.currentTarget.classList.add('active');
-        }
+</main>
 
-        // TIMERS LOGIC
-        function updateTimers() {
-            const now = new Date();
-            
-            // 수능 타이머 (2026년 11월 19일)
-            const suneungDate = new Date('2026-11-19T08:40:00');
-            const diffSuneung = suneungDate - now;
-            
-            if (diffSuneung > 0) {
-                const days = Math.floor(diffSuneung / (1000 * 60 * 60 * 24));
-                const hours = String(Math.floor((diffSuneung % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
-                const mins = String(Math.floor((diffSuneung % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
-                const secs = String(Math.floor((diffSuneung % (1000 * 60)) / 1000)).padStart(2, '0');
-                document.getElementById('suneung-timer').innerText = `D-${days} ${hours}:${mins}:${secs}`;
-            } else {
-                document.getElementById('suneung-timer').innerText = "수능 종료 // MISSION COMPLETE";
-            }
+<script>
+/* =========================================================
+   CORE CONFIG & DATA STRUCTURES
+   ========================================================= */
+const YT_API_KEY = "AIzaSyATH3qxHR3SjUZZTsvYy6qIBNvDqdT-JVg"; 
+const YT_ENDPOINT = "https://www.googleapis.com/youtube/v3/search";
 
-            // 7월 잔여 시간 타이머 (2026년 7월 31일 23:59:59)
-            const endOfJuly = new Date('2026-07-31T23:59:59');
-            const diffJuly = endOfJuly - now;
+// 확정된 2026 춘천고 3학년 학사일정 마스터 데이터 (오차 정정 완료)
+const SCHOOL_CALENDAR = [
+  { start: "2026-07-15", end: "2026-07-16", title: "상록제 (학교 축제)", tag: "학교행사" },
+  { start: "2026-07-21", end: "2026-08-09", title: "하계방학 (여름방학)", tag: "방학일정" },
+  { date: "2026-08-10", title: "개학식", tag: "학교행사" },
+  { date: "2026-08-17", title: "광복절 대체공휴일", tag: "공휴일" },
+  { start: "2026-09-01", end: "2026-09-04", title: "중국자매학교방문일", tag: "대외교류" },
+  { date: "2026-09-02", title: "9월 전국연합학력평가 (평가원 모의평가)", tag: "중요시험" },
+  { start: "2026-09-08", end: "2026-09-10", title: "제2회 영어듣기평가", tag: "학력평가" },
+  { start: "2026-09-24", end: "2026-09-26", title: "추석 연휴", tag: "공휴일" },
+  { start: "2026-09-29", end: "2026-10-02", title: "3학년 2학기 1회고사 (중간고사)", tag: "지필평가" },
+  { date: "2026-10-05", title: "개천절 대체공휴일", tag: "공휴일" },
+  { date: "2026-10-09", title: "한글날 (금요일 휴무)", tag: "공휴일" },
+  { date: "2026-10-20", title: "10월 전국연합학력평가 (교육청 모의고사)", tag: "중요시험" },
+  { start: "2026-10-26", end: "2026-10-29", title: "일본자매학교방문일", tag: "대외교류" },
+  { date: "2026-11-19", title: "대망의 대학수학능력시험 (본수능 ★)", tag: "D-DAY" },
+  { start: "2026-11-23", end: "2026-11-27", title: "3학년 2학기 2회고사 (기말고사)", tag: "지필평가" },
+  { date: "2026-12-25", title: "성탄절 (크리스마스)", tag: "공휴일" },
+  { date: "2026-12-29", title: "제98회 졸업식 (화요일 졸업)", tag: "졸업/수료" }
+];
 
-            if (diffJuly > 0) {
-                const days = Math.floor(diffJuly / (1000 * 60 * 60 * 24));
-                const hours = String(Math.floor((diffJuly % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
-                const mins = String(Math.floor((diffJuly % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
-                const secs = String(Math.floor((diffJuly % (1000 * 60)) / 1000)).padStart(2, '0');
-                document.getElementById('july-timer').innerText = `${days}일 ${hours}:${mins}:${secs}`;
-            } else {
-                document.getElementById('july-timer').innerText = "7월 종료 // TIME EXPIRED";
-            }
-        }
-        setInterval(updateTimers, 1000);
-        updateTimers();
+const CATEGORIES = {
+  math: {
+    label: "수학 기출 · 킬러 해설 풀이",
+    badge: "MATH",
+    query: "수능 수학 기출 해설 킬러문항",
+    mock: [
+      { title: "[수능 수학] 22번 킬러 문항 5분 컷 풀이 전략", channel: "수학의별", mockSeed: 11 },
+      { title: "2025 수능 미적분 30번 — 그래프로 직관 잡기", channel: "수학연구소", mockSeed: 12 },
+      { title: "확률과 통계 빈출 패턴 3가지 (9평 대비)", channel: "현우진 PICK", mockSeed: 13 }
+    ]
+  },
+  english: {
+    label: "영어 독해 · 빈칸/순서/삽입",
+    badge: "EN",
+    query: "수능 영어 독해 빈칸 추론 풀이법",
+    mock: [
+      { title: "수능 영어 빈칸 — 글의 흐름으로 푸는 법", channel: "조정식 ENG", mockSeed: 21 },
+      { title: "1등급의 순서 배열 사고 회로 공개", channel: "이명학T", mockSeed: 22 },
+      { title: "어법성 판단 5초 풀이 체크리스트", channel: "EBSi 영어", mockSeed: 23 }
+    ]
+  },
+  mental: {
+    label: "멘탈관리 · SQ3R 고3 최적화 공부법",
+    badge: "PSY",
+    query: "SQ3R 공부법 고3 멘탈관리 수능",
+    mock: [
+      { title: "SQ3R 학습법 — 교과서 1번에 끝내는 5단계", channel: "공부심리연구소", mockSeed: 31 },
+      { title: "고3 슬럼프, 뇌과학으로 5분 안에 빠져나오기", channel: "BRAIN STUDY", mockSeed: 32 },
+      { title: "수능 D-100, 멘탈 무너질 때 보는 영상", channel: "고3멘토", mockSeed: 33 }
+    ]
+  }
+};
 
-        // SCORE RECORD LOGIC (DATE-BASED AUTOMATION)
-        function saveScores() {
-            const kor = document.getElementById('score-kor').value || 0;
-            const math = document.getElementById('score-math').value || 0;
-            const eng = document.getElementById('score-eng').value || 0;
-            const sub1 = document.getElementById('score-sub1').value || 0;
-            const sub2 = document.getElementById('score-sub2').value || 0;
+const SUBJECTS = [
+  { key: "kor", label: "국어", color: "#00ff41" },
+  { key: "math", label: "수학", color: "#38bdf8" }
+];
 
-            const now = new Date();
-            const dateStr = now.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/ /g, '');
-            
-            // 날짜 기반 자동 시험명 할당
-            let examName = "자율학습 모의평가";
-            if (dateStr.includes("09.02")) examName = "9월 모의평가";
-            if (dateStr.includes("10.20")) examName = "10월 학력평가";
+/* =========================================================
+   DOM ELEMENTS CACHING
+   ========================================================= */
+const $grid = document.getElementById("grid");
+const $sectionTitle = document.getElementById("sectionTitle");
+const $statusbar = document.getElementById("statusbar");
+const $statusMsg = document.getElementById("statusMsg");
+const $chips = document.querySelectorAll(".chip");
 
-            const record = {
-                date: dateStr,
-                name: examName,
-                scores: `국:${kor} 수:${math} 영:${eng} 탐1:${sub1} 탐2:${sub2}`
-            };
+/* =========================================================
+   TAB SYSTEM ROUTER
+   ========================================================= */
+function switchTab(tabId) {
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  
+  document.getElementById(tabId).classList.add('active');
+  event.currentTarget.classList.add('active');
+  
+  if (tabId === 'calculator') {
+    renderDashboard();
+  }
+}
 
-            let history = JSON.parse(localStorage.getItem('gwhsi_history')) || [];
-            history.unshift(record);
-            localStorage.setItem('gwhsi_history', JSON.stringify(history));
-            
-            renderHistory();
-            alert(`${examName} 기록이 무사히 시스템에 마운트되었습니다.`);
-        }
+/* =========================================================
+   REALTIME MILLISECOND DUAL TIMERS LOGIC (2.0 UI 발전)
+   ========================================================= */
+function tickTimers() {
+  const now = new Date();
+  
+  // 1. 수능 타이머 (2026년 11월 19일 목요일 08:40 입실 완료 기준)
+  const suneungTarget = new Date('2026-11-19T08:40:00');
+  const diffSuneung = suneungTarget - now;
+  
+  if (diffSuneung > 0) {
+    const d = Math.floor(diffSuneung / (1000 * 60 * 60 * 24));
+    const h = String(Math.floor((diffSuneung % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
+    const m = String(Math.floor((diffSuneung % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+    const s = String(Math.floor((diffSuneung % (1000 * 60)) / 1000)).padStart(2, '0');
+    document.getElementById('suneung-timer').innerText = `D-${d} ${h}:${m}:${s}`;
+  } else {
+    document.getElementById('suneung-timer').innerText = "SYSTEM COMPLETE // MISSION EXECUTED";
+  }
 
-        function renderHistory() {
-            const history = JSON.parse(localStorage.getItem('gwhsi_history')) || [];
-            const container = document.getElementById('history-container');
-            container.innerHTML = history.length === 0 ? '<p style="color:var(--text-1); font-size:13px;">저장된 기록 트랙이 없습니다.</p>' : '';
-            
-            history.forEach(item => {
-                container.innerHTML += `
-                    <div class="history-item">
-                        <span>📊 [${item.name}] (${item.date})</span>
-                        <span style="color:var(--neon-green)">${item.scores}</span>
-                    </div>
-                `;
-            });
-        }
-        renderHistory();
-    </script>
+  // 2. 7월 잔여 시간 타이머 (2026년 7월 31일 23:59:59 타겟)
+  const endJulyTarget = new Date('2026-07-31T23:59:59');
+  const diffJuly = endJulyTarget - now;
+  
+  if (diffJuly > 0) {
+    const d = Math.floor(diffJuly / (1000 * 60 * 60 * 24));
+    const h = String(Math.floor((diffJuly % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
+    const m = String(Math.floor((diffJuly % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+    const s = String(Math.floor((diffJuly % (1000 * 60)) / 1000)).padStart(2, '0');
+    document.getElementById('july-timer').innerText = `${d}일 ${h}:${m}:${s}`;
+  } else {
+    document.getElementById('july-timer').innerText = "JULY EXPIRED // TIME PACKET ENDED";
+  }
+}
+setInterval(tickTimers, 1000);
+tickTimers();
+
+/* =========================================================
+   SCHEDULE TAB GENERATOR
+   ========================================================= */
+function initScheduleTable() {
+  const $tbody = document.getElementById("scheduleTableBody");
+  $tbody.innerHTML = SCHOOL_CALENDAR.map(item => {
+    let dateLine = "";
+    if (item.date) {
+      dateLine = formatDateStr(item.date);
+    } else if (item.start && item.end) {
+      dateLine = `${formatDateStr(item.start)} ~ ${formatDateStr(item.end)}`;
+    }
+    return `
+      <tr>
+        <td style="font-family: var(--font-mono); font-weight: 500;">${dateLine}</td>
+        <td style="font-weight: 700;">${item.title}</td>
+        <td><span style="color: var(--neon-green); font-size:12px; font-family:var(--font-mono)">[${item.tag}]</span></td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function formatDateStr(str) {
+  return str.replaceAll("-", ".");
+}
+
+/* =========================================================
+   STUDY HUD: YOUTUBE API CARD PLAYER (1.0 100% 보존)
+   ========================================================= */
+function showStatus(msg) {
+  $statusMsg.textContent = msg;
+  $statusbar.classList.add("is-visible");
+}
+function hideStatus() {
+  $statusbar.classList.remove("is-visible");
+}
+
+function makeMockThumb(category, seed) {
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 270" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="g${seed}" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#0a0d14"/>
+          <stop offset="100%" stop-color="#111622"/>
+        </linearGradient>
+        <pattern id="p${seed}" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+          <path d="M 24 0 L 0 0 0 24" fill="none" stroke="#00ff41" stroke-opacity="0.08" stroke-width="1"/>
+        </pattern>
+      </defs>
+      <rect width="480" height="270" fill="url(#g${seed})"/>
+      <rect width="480" height="270" fill="url(#p${seed})"/>
+      <circle cx="240" cy="135" r="90" fill="#00ff41" fill-opacity="0.04"/>
+      <text x="32" y="200" font-family="JetBrains Mono, monospace" font-size="26" font-weight="800" fill="#00ff41" opacity="0.8">
+        ${category.toUpperCase()}
+      </text>
+      <text x="32" y="226" font-family="JetBrains Mono, monospace" font-size="11" fill="#9ca3af" letter-spacing="2">
+        // OFFLINE PREVIEW MOCK · #${seed}
+      </text>
+    </svg>
+  `.trim();
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
+function renderCards(items, category) {
+  $grid.innerHTML = "";
+  if (!items || items.length === 0) {
+    $grid.innerHTML = `<div class="empty">// 큐가 비어있습니다.</div>`;
+    return;
+  }
+  const badge = CATEGORIES[category]?.badge || "QUEUE";
+
+  items.forEach((item, idx) => {
+    const isReal = !!item.videoId;
+    const href = isReal ? `https://www.youtube.com/watch?v=${item.videoId}` : "#";
+    const thumbEl = isReal && item.thumbnail
+      ? `<img src="${item.thumbnail}" alt="" loading="lazy">`
+      : `<img class="placeholder-thumb" src="${makeMockThumb(category, item.mockSeed || idx + 1)}" alt="">`;
+
+    const a = document.createElement("a");
+    a.className = "card";
+    a.href = href;
+    if (isReal) {
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+    } else {
+      a.addEventListener("click", (e) => {
+        e.preventDefault();
+        showStatus("미리보기 덤프 데이터 카드입니다. YT_API_KEY 설정이 완료되면 실제 데이터 스트림이 바인딩됩니다.");
+      });
+    }
+
+    a.innerHTML = `
+      <div class="card__thumb">
+        ${thumbEl}
+        <span class="card__badge">${badge}</span>
+      </div>
+      <div class="card__body">
+        <h3 class="card__title">${escapeHtml(item.title)}</h3>
+        <div class="card__meta">
+          <span class="card__channel">${escapeHtml(item.channel || "youtube.stream")}</span>
+          <span class="card__arrow">→</span>
+        </div>
+      </div>
+    `;
+    $grid.appendChild(a);
+  });
+}
+
+function renderSkeletons(n = 3) {
+  $grid.innerHTML = "";
+  for (let i = 0; i < n; i++) {
+    const div = document.createElement("div");
+    div.className = "card card--skeleton";
+    div.innerHTML = `
+      <div class="card__thumb"><div class="skeleton-block"></div></div>
+      <div class="card__body">
+        <div class="skeleton-block skel-title"></div>
+        <div class="skeleton-block skel-title short"></div>
+        <div class="skeleton-block skel-meta"></div>
+      </div>
+    `;
+    $grid.appendChild(div);
+  }
+}
+
+function escapeHtml(str) {
+  return String(str).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+}
+
+async function fetchYouTube(category) {
+  const cfg = CATEGORIES[category];
+  if (!cfg) throw new Error("bad_category");
+  if (!YT_API_KEY || YT_API_KEY.includes("YOUR_API_KEY")) {
+    throw new Error("NO_API_KEY");
+  }
+
+  const params = new URLSearchParams({
+    part: "snippet", q: cfg.query, type: "video", maxResults: "6",
+    order: "relevance", regionCode: "KR", relevanceLanguage: "ko",
+    safeSearch: "strict", key: YT_API_KEY
+  });
+
+  const res = await fetch(`${YT_ENDPOINT}?${params.toString()}`);
+  if (!res.ok) throw new Error(`API_ERROR_${res.status}`);
+  const data = await res.json();
+  
+  return data.items.map(it => ({
+    title: it.snippet.title,
+    channel: it.snippet.channelTitle,
+    videoId: it.id.videoId,
+    thumbnail: it.snippet.thumbnails?.medium?.url
+  }));
+}
+
+async function loadCategory(category) {
+  const cfg = CATEGORIES[category];
+  $sectionTitle.textContent = `// STREAM QUEUE: ${cfg.label}`;
+  renderSkeletons(3);
+
+  try {
+    const videos = await fetchYouTube(category);
+    hideStatus();
+    renderCards(videos, category);
+  } catch (err) {
+    if (err.message === "NO_API_KEY") {
+      showStatus("DUMP MODE — 샌드박스 가상 데이터를 마운트했습니다. 실시간 API 연동을 하려면 스크립트 키 파트를 활성화하세요.");
+    } else {
+      showStatus(`DUMP MODE OVERRIDE — 유튜브 통신 장애 (${err.message}) 에 대응하여 안전한 mock 버퍼를 출력합니다.`);
+    }
+    renderCards(cfg.mock, category);
+  }
+}
+
+/* =========================================================
+   SCORE CALCULATOR HUD DASHBOARD LOGIC (1.0 SVG + 2.0 LIST 결합)
+   ========================================================= */
+function getRecords() {
+  return JSON.parse(localStorage.getItem("gwhsi_score_records")) || [];
+}
+
+function handleScoreSubmit(e) {
+  e.preventDefault();
+  const kor = parseInt(document.getElementById("score-kor").value) || null;
+  const math = parseInt(document.getElementById("score-math").value) || null;
+  const eng = parseInt(document.getElementById("score-eng").value) || null;
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/ /g, '');
+
+  let labelChoice = document.getElementById("score-label").value;
+  if (labelChoice === "auto") {
+    labelChoice = "자율학습 모의평가";
+    if (dateStr.includes("09.02") || dateStr.includes("09.03")) labelChoice = "9월 모의평가";
+    if (dateStr.includes("10.20")) labelChoice = "10월 학력평가";
+    if (dateStr.includes("11.19")) labelChoice = "대학수학능력시험";
+  }
+
+  const newRecord = {
+    id: "rec_" + Date.now(),
+    date: dateStr,
+    label: labelChoice,
+    scores: { kor, math, eng }
+  };
+
+  const records = getRecords();
+  records.push(newRecord);
+  localStorage.setItem("gwhsi_score_records", JSON.stringify(records));
+
+  e.target.reset();
+  renderDashboard();
+}
+
+function deleteRecord(id) {
+  let records = getRecords();
+  records = records.filter(r => r.id !== id);
+  localStorage.setItem("gwhsi_score_records", JSON.stringify(records));
+  renderDashboard();
+}
+
+function renderDashboard() {
+  const records = getRecords();
+  renderScoreList(records);
+  renderCharts(records);
+}
+
+function renderScoreList(records) {
+  const $list = document.getElementById("scoreList");
+  if (records.length === 0) {
+    $list.innerHTML = `<div class="empty">// 마운트된 데이터 노드가 없습니다.</div>`;
+    return;
+  }
+  const sorted = [...records].sort((a, b) => b.id.localeCompare(a.id));
+  $list.innerHTML = sorted.map(r => {
+    const scoresLine = `국어:${r.scores.kor ?? "-"}점 · 수학:${r.scores.math ?? "-"}점 · 영어:${r.scores.eng ?? "-"}점`;
+    return `
+      <div class="history-item">
+        <div class="history-item__top">
+          <span class="history-item__title">📊 [${r.label}]</span>
+          <span>${r.date}</span>
+        </div>
+        <div class="history-item__scores">${scoresLine}</div>
+        <button class="score-del-btn" onclick="deleteRecord('${r.id}')" type="button">제거</button>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderCharts(records) {
+  const $graphs = document.getElementById("graphs");
+  $graphs.innerHTML = "";
+
+  const recent = [...records].sort((a, b) => a.id.localeCompare(b.id)).slice(-5);
+
+  SUBJECTS.forEach(sub => {
+    const validData = recent
+      .map((r, i) => ({ val: r.scores[sub.key], idx: i }))
+      .filter(d => d.val !== null && d.val !== undefined);
+
+    let polylinePoints = "";
+    let dots = "";
+
+    if (validData.length >= 2) {
+      const width = 280;
+      const height = 80;
+      const stepX = recent.length > 1 ? width / (recent.length - 1) : width;
+
+      polylinePoints = validData.map(d => {
+        const x = d.idx * stepX;
+        const y = height - (d.val / 100) * height;
+        
+        dots += `<circle cx="${x}" cy="${y}" r="4" fill="${sub.color}" />`;
+        dots += `<text x="${x}" y="${y - 8}" font-family="var(--font-mono)" font-size="9" fill="${sub.color}" text-anchor="middle">${d.val}</text>`;
+        
+        return `${x},${y}`;
+      }).join(" ");
+    }
+
+    const card = document.createElement("div");
+    card.className = "graph-card";
+    card.innerHTML = `
+      <div class="graph-card__title">${sub.label} 분석 스트림</div>
+      <svg class="graph-svg">
+        <g stroke="rgba(255,255,255,0.05)" stroke-width="1">
+          <line x1="0" y1="20" x2="320" y2="20" />
+          <line x1="0" y1="50" x2="320" y2="50" />
+          <line x1="0" y1="80" x2="320" y2="80" />
+        </g>
+        <polyline fill="none" stroke="${sub.color}" stroke-width="2" points="${polylinePoints}" stroke-linejoin="round" stroke-linecap="round" />
+        ${dots}
+        ${validData.length < 2 ? `<text x="50%" y="55%" font-size="12" fill="var(--text-2)" text-anchor="middle">// 데이터 부족 (2회 이상 입력 필요)</text>` : ''}
+      </svg>
+    `;
+    $graphs.appendChild(card);
+  });
+}
+
+/* =========================================================
+   EVENT CHIP HANDLERS BINDINGS
+   ========================================================= */
+$chips.forEach(chip => {
+  chip.addEventListener("click", () => {
+    $chips.forEach(c => c.classList.remove("is-active"));
+    chip.classList.add("is-active");
+    loadCategory(chip.dataset.category);
+  });
+});
+
+/* =========================================================
+   SYSTEM BOOT
+   ========================================================= */
+initScheduleTable();
+loadCategory("math");
+</script>
 </body>
 </html>
-
